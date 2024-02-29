@@ -1,7 +1,7 @@
-package com.yaroslavyankov.authmicroservice.web.mappers;
+package com.mvp.crudmicroservice.web.mappers;
 
-import com.yaroslavyankov.authmicroservice.domain.user.User;
-import com.yaroslavyankov.authmicroservice.web.dto.user.UserDto;
+import com.mvp.crudmicroservice.domain.user.User;
+import com.mvp.crudmicroservice.web.dto.user.UserDto;
 import org.mapstruct.Mapper;
 
 

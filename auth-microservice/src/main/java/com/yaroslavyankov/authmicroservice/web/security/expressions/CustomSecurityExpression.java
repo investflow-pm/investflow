@@ -1,7 +1,6 @@
 package com.yaroslavyankov.authmicroservice.web.security.expressions;
 
 import com.yaroslavyankov.authmicroservice.domain.user.Role;
-import com.yaroslavyankov.authmicroservice.service.UserService;
 import com.yaroslavyankov.authmicroservice.web.security.JwtEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Service;
 @Service("customSecurityExpression")
 @RequiredArgsConstructor
 public class CustomSecurityExpression {
-
-    private final UserService userService;
 
     public boolean canAccessUser(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

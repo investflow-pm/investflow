@@ -3,8 +3,9 @@ package com.yaroslavyankov.authmicroservice.web.security;
 import com.yaroslavyankov.authmicroservice.domain.exception.AccessDeniedException;
 import com.yaroslavyankov.authmicroservice.domain.user.Role;
 import com.yaroslavyankov.authmicroservice.domain.user.User;
-import com.yaroslavyankov.authmicroservice.service.UserService;
 import com.yaroslavyankov.authmicroservice.service.props.JwtProperties;
+import com.yaroslavyankov.authmicroservice.service.props.LinkProperties;
+import com.yaroslavyankov.authmicroservice.web.dto.UserDto;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -13,11 +14,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.Key;
 import java.time.Instant;
@@ -35,8 +38,9 @@ public class JwtTokenProvider {
 
     private final UserDetailsService userDetailsService;
 
-    private final UserService userService;
+    private final RestTemplate restTemplate;
 
+    private final LinkProperties linkProperties;
     private Key key;
 
     @PostConstruct
@@ -84,16 +88,22 @@ public class JwtTokenProvider {
     public JwtResponse refreshUserTokens(String refreshToken) {
         JwtResponse jwtResponse = new JwtResponse();
         if (!validateToken(refreshToken)) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Ошибка валидации токена.");
         }
         Long userId = Long.valueOf(getId(refreshToken));
-        User user = userService.getById(userId);
-        jwtResponse.setId(userId);
-        jwtResponse.setUsername(user.getUsername());
-        jwtResponse.setAccessToken(createAccessToken(userId, user.getUsername(), user.getRoles()));
-        jwtResponse.setRefreshToken(createRefreshToken(userId, user.getUsername()));
+        ResponseEntity<UserDto> response
+                = restTemplate.getForEntity(linkProperties.getUserServiceLink() + "/{userId}", UserDto.class, userId);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            UserDto userDto = response.getBody();
+            jwtResponse.setId(userId);
+            jwtResponse.setUsername(userDto.getUsername());
+            jwtResponse.setAccessToken(createAccessToken(userId, userDto.getUsername(), userDto.getRoles()));
+            jwtResponse.setRefreshToken(createRefreshToken(userId, userDto.getUsername()));
 
-        return jwtResponse;
+            return jwtResponse;
+        } else {
+            throw new AccessDeniedException("Ошибка определения пользователя");
+        }
     }
 
     public boolean validateToken(String token) {

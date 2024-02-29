@@ -6,13 +6,11 @@ import com.mvp.investservice.web.dto.StockDto;
 import com.mvp.investservice.web.mappers.impl.StockMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,7 @@ public class StockServiceImpl implements StockService {
         try {
             stocks = investApi.getInstrumentsService()
                     .getAllShares()
-                    .get().subList(0, 10);
+                    .get().subList(0, 200);
             log.info("Getting stocks from api - {}", (stocks != null));
         } catch (Exception e) {
             log.error("Bad request to external api...");
@@ -43,4 +41,6 @@ public class StockServiceImpl implements StockService {
 
         return stockMapper.toDto(stocks);
     }
+
+
 }

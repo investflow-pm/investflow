@@ -1,6 +1,6 @@
-package com.yaroslavyankov.authmicroservice.repository;
+package com.mvp.crudmicroservice.repository;
 
-import com.yaroslavyankov.authmicroservice.domain.user.User;
+import com.mvp.crudmicroservice.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

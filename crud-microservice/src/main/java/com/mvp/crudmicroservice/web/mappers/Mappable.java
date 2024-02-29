@@ -1,4 +1,4 @@
-package com.yaroslavyankov.authmicroservice.web.mappers;
+package com.mvp.crudmicroservice.web.mappers;
 
 import java.util.List;
 

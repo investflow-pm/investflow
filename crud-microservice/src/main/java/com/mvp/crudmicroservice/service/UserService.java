@@ -1,7 +1,6 @@
-package com.yaroslavyankov.authmicroservice.service;
+package com.mvp.crudmicroservice.service;
 
-
-import com.yaroslavyankov.authmicroservice.domain.user.User;
+import com.mvp.crudmicroservice.domain.user.User;
 
 public interface UserService {
 

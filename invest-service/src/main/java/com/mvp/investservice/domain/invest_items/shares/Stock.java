@@ -3,8 +3,9 @@ package com.mvp.investservice.domain.invest_items.shares;
 import jakarta.persistence.*;
 import lombok.Data;
 
+
 @Entity
-@Table(name = "stock")
+@Table(name = "stocks")
 @Data
 public class Stock {
 

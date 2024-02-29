@@ -1,8 +1,10 @@
 package com.yaroslavyankov.authmicroservice.config;
 
+import com.yaroslavyankov.authmicroservice.web.handlers.RestTemplateErrorHandler;
 import com.yaroslavyankov.authmicroservice.web.security.JwtTokenFilter;
 import com.yaroslavyankov.authmicroservice.web.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +32,13 @@ public class ApplicationConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final ApplicationContext applicationContext;
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplateBuilder()
+                .errorHandler(new RestTemplateErrorHandler())
+                .build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -61,6 +71,7 @@ public class ApplicationConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("api/v1/crud/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .anonymous(AbstractHttpConfigurer::disable)

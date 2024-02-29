@@ -14,6 +14,7 @@
 		<module>frontend</module>
 		<module>auth-microservice</module>
 		<module>invest-service</module>
+		<module>crud-microservice</module>
 	</modules>
 
     <properties>

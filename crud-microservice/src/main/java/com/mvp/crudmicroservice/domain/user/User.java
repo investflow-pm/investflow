@@ -1,4 +1,4 @@
-package com.yaroslavyankov.authmicroservice.domain.user;
+package com.mvp.crudmicroservice.domain.user;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,11 +16,10 @@ public class User implements Serializable {
     private Long id;
 
     private String name;
-    private String username;
-    private String password;
 
-    @Transient
-    private String passwordConfirmation;
+    private String username;
+
+    private String password;
 
     @Column(name = "role")
     @ElementCollection(fetch = FetchType.EAGER)

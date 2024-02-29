@@ -14,7 +14,6 @@ public class ApplicationConfig {
 
     private final InvestProperties investProperties;
 
-//    t.AH0I6SMNFaFJhnATn36NMf7Rlv06sItlSlid1U45zRF4Uks0OargwwuMxNe_fBOvwptnmD5-4cFQgJKTfEVe1w
     @Bean
     public InvestApi investApi() {
         return InvestApi.createSandbox(investProperties.getToken());
