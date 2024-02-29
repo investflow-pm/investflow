@@ -1,4 +1,4 @@
-package com.mvp.crudmicroservice.domain.user;
+package com.yaroslavyankov.authmicroservice.domain.user;
 
 import jakarta.persistence.*;
 import lombok.Data;
