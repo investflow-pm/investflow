@@ -1,12 +1,12 @@
-package com.mvp.crudmicroservice.web.controller;
+package com.mvp.crudmicroservice.user.web.controller;
 
-import com.mvp.crudmicroservice.domain.exception.ResourceNotFoundException;
-import com.mvp.crudmicroservice.domain.exception.UserAlreadyExistsException;
-import com.mvp.crudmicroservice.domain.user.User;
-import com.mvp.crudmicroservice.service.UserService;
-import com.mvp.crudmicroservice.web.dto.auth.JwtRequest;
-import com.mvp.crudmicroservice.web.dto.user.UserDto;
-import com.mvp.crudmicroservice.web.mappers.UserMapper;
+import com.mvp.crudmicroservice.user.domain.exception.ResourceNotFoundException;
+import com.mvp.crudmicroservice.user.domain.exception.UserAlreadyExistsException;
+import com.mvp.crudmicroservice.user.domain.user.User;
+import com.mvp.crudmicroservice.user.service.UserService;
+import com.mvp.crudmicroservice.user.web.dto.auth.JwtRequest;
+import com.mvp.crudmicroservice.user.web.dto.user.UserDto;
+import com.mvp.crudmicroservice.user.web.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

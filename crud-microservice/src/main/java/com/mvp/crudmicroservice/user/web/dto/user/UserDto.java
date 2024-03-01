@@ -1,7 +1,6 @@
-package com.mvp.crudmicroservice.web.dto.user;
+package com.mvp.crudmicroservice.user.web.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mvp.crudmicroservice.domain.user.Role;
+import com.mvp.crudmicroservice.user.domain.user.Role;
 import lombok.Data;
 
 import java.util.Set;

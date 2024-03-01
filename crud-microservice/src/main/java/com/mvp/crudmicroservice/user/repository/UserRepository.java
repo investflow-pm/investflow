@@ -1,6 +1,6 @@
-package com.mvp.crudmicroservice.repository;
+package com.mvp.crudmicroservice.user.repository;
 
-import com.mvp.crudmicroservice.domain.user.User;
+import com.mvp.crudmicroservice.user.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,10 +1,10 @@
-package com.mvp.crudmicroservice.service.impl;
+package com.mvp.crudmicroservice.user.service.impl;
 
-import com.mvp.crudmicroservice.domain.exception.UserAlreadyExistsException;
-import com.mvp.crudmicroservice.domain.exception.ResourceNotFoundException;
-import com.mvp.crudmicroservice.domain.user.User;
-import com.mvp.crudmicroservice.repository.UserRepository;
-import com.mvp.crudmicroservice.service.UserService;
+import com.mvp.crudmicroservice.user.domain.exception.UserAlreadyExistsException;
+import com.mvp.crudmicroservice.user.domain.exception.ResourceNotFoundException;
+import com.mvp.crudmicroservice.user.domain.user.User;
+import com.mvp.crudmicroservice.user.repository.UserRepository;
+import com.mvp.crudmicroservice.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.mvp.crudmicroservice.web.dto.auth;
+package com.mvp.crudmicroservice.user.web.dto.auth;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

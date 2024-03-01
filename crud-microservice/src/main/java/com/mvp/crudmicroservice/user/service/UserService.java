@@ -1,6 +1,6 @@
-package com.mvp.crudmicroservice.service;
+package com.mvp.crudmicroservice.user.service;
 
-import com.mvp.crudmicroservice.domain.user.User;
+import com.mvp.crudmicroservice.user.domain.user.User;
 
 public interface UserService {
 
