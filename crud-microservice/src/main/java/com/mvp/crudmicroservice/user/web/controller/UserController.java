@@ -13,10 +13,12 @@ import com.mvp.crudmicroservice.user.web.dto.user.UserDto;
 import com.mvp.crudmicroservice.user.web.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -64,12 +66,15 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long userId) {
+    public ResponseEntity getUserById(@PathVariable Long userId) {
         try {
             User user = userService.getById(userId);
             return ResponseEntity.ok().body(userMapper.toDto(user));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header("error-message", e.getMessage())
+                    .body(e.getMessage());
         }
     }
 

@@ -1,6 +1,5 @@
-package com.mvp.crudmicroservice.user.web.dto.user;
+package com.mvp.investservice.web.dto;
 
-import com.mvp.crudmicroservice.user.domain.user.Role;
 import lombok.Data;
 
 import java.util.Set;

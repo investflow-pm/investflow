@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getById(final Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Не удалось найти пользователся с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("There is no user with id %d", id)));
     }
 
     @Override

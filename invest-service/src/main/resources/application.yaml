@@ -3,3 +3,6 @@ server:
 
 secret:
   token: t.AH0I6SMNFaFJhnATn36NMf7Rlv06sItlSlid1U45zRF4Uks0OargwwuMxNe_fBOvwptnmD5-4cFQgJKTfEVe1w
+
+rest:
+  userServiceLink: http://localhost:9097/api/v1/crud/users
