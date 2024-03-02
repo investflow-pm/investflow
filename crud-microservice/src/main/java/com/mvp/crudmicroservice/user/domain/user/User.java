@@ -1,9 +1,12 @@
 package com.mvp.crudmicroservice.user.domain.user;
 
+import com.mvp.crudmicroservice.portfolio.domain.UserStockPortfolio;
+import com.mvp.crudmicroservice.stock.domain.Stock;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -27,4 +30,6 @@ public class User implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private Set<Role> roles;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserStockPortfolio> stockPortfolio;
 }

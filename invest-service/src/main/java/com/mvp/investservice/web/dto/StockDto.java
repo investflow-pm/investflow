@@ -23,4 +23,6 @@ public class StockDto {
     private String currency;
 
     private String countryOfRiskName;
+
+    private Long lot;
 }

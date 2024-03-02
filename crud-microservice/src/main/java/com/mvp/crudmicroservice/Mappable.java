@@ -1,4 +1,4 @@
-package com.mvp.crudmicroservice.user.web.mappers;
+package com.mvp.crudmicroservice;
 
 import java.util.List;
 

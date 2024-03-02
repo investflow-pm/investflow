@@ -25,6 +25,7 @@ public class StockMapper implements Mappable<Share, StockDto> {
        stockDto.setCountryOfRiskName(stock.getCountryOfRiskName());
        stockDto.setCurrency(stock.getCurrency());
        stockDto.setSector(stock.getSector());
+       stockDto.setLot((long) stock.getLot());
 
        return stockDto;
     }

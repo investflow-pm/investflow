@@ -1,17 +1,24 @@
 package com.mvp.crudmicroservice.user.web.controller;
 
+
+import com.mvp.crudmicroservice.AssetService;
+import com.mvp.crudmicroservice.stock.domain.Stock;
+import com.mvp.crudmicroservice.stock.web.mapper.StockMapper;
 import com.mvp.crudmicroservice.user.domain.exception.ResourceNotFoundException;
 import com.mvp.crudmicroservice.user.domain.exception.UserAlreadyExistsException;
 import com.mvp.crudmicroservice.user.domain.user.User;
 import com.mvp.crudmicroservice.user.service.UserService;
 import com.mvp.crudmicroservice.user.web.dto.auth.JwtRequest;
 import com.mvp.crudmicroservice.user.web.dto.user.UserDto;
-import com.mvp.crudmicroservice.user.web.mappers.UserMapper;
+import com.mvp.crudmicroservice.user.web.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/crud/users")
@@ -75,9 +82,11 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         userService.delete(userId);
         return ResponseEntity.ok().body("Пользователь успешно удалён");
     }
+
 }

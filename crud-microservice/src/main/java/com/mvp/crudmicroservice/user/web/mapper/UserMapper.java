@@ -1,5 +1,6 @@
-package com.mvp.crudmicroservice.user.web.mappers;
+package com.mvp.crudmicroservice.user.web.mapper;
 
+import com.mvp.crudmicroservice.Mappable;
 import com.mvp.crudmicroservice.user.domain.user.User;
 import com.mvp.crudmicroservice.user.web.dto.user.UserDto;
 import org.mapstruct.Mapper;
