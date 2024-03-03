@@ -1,7 +1,6 @@
 package com.mvp.crudmicroservice.user.domain.user;
 
 import com.mvp.crudmicroservice.portfolio.domain.UserStockPortfolio;
-import com.mvp.crudmicroservice.stock.domain.Stock;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -33,5 +32,7 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserStockPortfolio> stockPortfolio;
 
-    private String investAccountId;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private Account investAccount;
 }

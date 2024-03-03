@@ -11,4 +11,5 @@ public class LinkProperties {
 
     private String userServiceLink;
 
+    private String accountServiceLink;
 }

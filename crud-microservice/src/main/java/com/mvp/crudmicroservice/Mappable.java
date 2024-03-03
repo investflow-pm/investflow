@@ -1,5 +1,7 @@
 package com.mvp.crudmicroservice;
 
+import org.mapstruct.SubclassMapping;
+
 import java.util.List;
 
 public interface Mappable<E, D> {

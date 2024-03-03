@@ -19,7 +19,10 @@ public class RestTemplateErrorHandler implements ResponseErrorHandler {
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
         if (response.getStatusCode() == HttpStatus.CONFLICT) {
-            throw new IllegalStateException("Такой пользователь уже существует");
+            String errorMessage = response
+                    .getHeaders()
+                    .getFirst("error-message");
+            throw new ResourceNotFoundException(errorMessage != null ? errorMessage : "Resource not found");
         }
         if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
             String errorMessage = response.getHeaders().getFirst("error-message");

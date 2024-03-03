@@ -6,3 +6,4 @@ secret:
 
 rest:
   userServiceLink: http://localhost:9097/api/v1/crud/users
+  accountServiceLink: http://localhost:9097/api/v1/crud/users/accounts

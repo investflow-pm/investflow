@@ -18,6 +18,4 @@ public class UserDto {
 
     private Set<Role> roles;
 
-    private String investAccountId;
-
 }
