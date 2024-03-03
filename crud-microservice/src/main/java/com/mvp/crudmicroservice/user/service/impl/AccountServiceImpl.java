@@ -35,4 +35,15 @@ public class AccountServiceImpl implements AccountService {
             return existAccount.get();
         }
     }
+
+    @Override
+    public Account update(Account account) {
+        return accountRepository.save(account);
+    }
+
+    @Override
+    public Account getById(String accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    }
 }
