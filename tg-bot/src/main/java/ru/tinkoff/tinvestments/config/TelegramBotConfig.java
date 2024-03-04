@@ -13,4 +13,8 @@ public class TelegramBotConfig {
     @Value("${bot.token}")
     @Getter
     private String botToken;
+
+    @Value("${command.start.picture}")
+    @Getter
+    private String startPicture;
 }
