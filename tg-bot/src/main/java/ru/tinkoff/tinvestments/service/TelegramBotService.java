@@ -3,9 +3,12 @@ package ru.tinkoff.tinvestments.service;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.tinkoff.tinvestments.config.TelegramBotConfig;
+import ru.tinkoff.tinvestments.model.TelegramBotCommand;
 
 @Component
 public class TelegramBotService extends TelegramLongPollingBot {
@@ -21,24 +24,52 @@ public class TelegramBotService extends TelegramLongPollingBot {
             var message = update.getMessage().getText();
             var chatId = update.getMessage().getChatId();
 
-            switch (message) {
-                case "/start":
-                    sendMessage(chatId, "Hello world");
-                    break;
+            if (message.startsWith("/")) {
+                handleCommand(chatId, message);
             }
         }
     }
 
-    private void sendMessage(Long chatId, String text) {
+    private void handleCommand(Long chatId, String commandString) {
+        var command = TelegramBotCommand.fromString(commandString);
+        if (command == null) {
+            return;
+        }
+
+        try {
+            switch (command) {
+                case START -> sendPicture(chatId, botConfig.getStartPicture(), "Hello world");
+
+                default -> sendMessage(chatId, "Error");
+            }
+        }
+        catch (TelegramApiException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void sendMessage(Long chatId, String text) throws TelegramApiException {
         var message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
 
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+        execute(message);
+    }
+
+    private void sendPicture(Long chatId, String pictureUrl) throws TelegramApiException {
+        this.sendPicture(chatId, pictureUrl, null);
+    }
+
+    private void sendPicture(Long chatId, String pictureUrl, String caption) throws TelegramApiException {
+        var picture = new SendPhoto();
+        picture.setChatId(chatId);
+        picture.setPhoto(new InputFile().setMedia(pictureUrl));
+
+        if (caption != null) {
+            picture.setCaption(caption);
         }
+
+        execute(picture);
     }
 
     @Override
