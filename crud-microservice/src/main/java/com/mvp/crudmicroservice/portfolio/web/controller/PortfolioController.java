@@ -7,6 +7,7 @@ import com.mvp.crudmicroservice.bond.web.mapper.BondMapper;
 import com.mvp.crudmicroservice.stock.domain.Stock;
 import com.mvp.crudmicroservice.stock.web.dto.StockDto;
 import com.mvp.crudmicroservice.stock.web.mapper.StockMapper;
+import com.mvp.crudmicroservice.user.domain.exception.BondAddingToUserException;
 import com.mvp.crudmicroservice.user.domain.exception.StockAddingToUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,7 +47,7 @@ public class PortfolioController {
             var bond = bondMapper.toEntity(bondDto);
             var addedBond = bondService.buyAsset(bond, userId, lots);
             return ResponseEntity.status(HttpStatus.CREATED).body(bondMapper.toDto(addedBond));
-        } catch (StockAddingToUserException e) {
+        } catch (BondAddingToUserException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
