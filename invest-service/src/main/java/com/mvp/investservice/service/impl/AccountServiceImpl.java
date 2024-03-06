@@ -8,11 +8,9 @@ import com.mvp.investservice.web.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import ru.tinkoff.piapi.contract.v1.MoneyValue;
 import ru.tinkoff.piapi.core.InvestApi;
 
@@ -53,6 +51,10 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    /*
+       TODO
+        исправить работу метода по обновлению баланса
+     */
     @Override
     public AccountDto payIn(String accountId, String amount) {
         MoneyValue moneyValue = getMoneyValue(amount);
@@ -81,7 +83,7 @@ public class AccountServiceImpl implements AccountService {
         int cents = Integer.parseInt(moneyValue[1]);
 
         return MoneyValue.newBuilder()
-                .setCurrency("rub")
+                .setCurrency("RUB")
                 .setUnits(rubs)
                 .setNano(cents)
                 .build();

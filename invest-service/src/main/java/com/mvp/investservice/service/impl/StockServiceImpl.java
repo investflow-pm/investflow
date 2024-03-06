@@ -1,46 +1,31 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.CannotProceedApiRequestException;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.StockDto;
-import com.mvp.investservice.web.mappers.impl.StockMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.core.InvestApi;
+import ru.tinkoff.piapi.core.models.Portfolio;
+import ru.tinkoff.piapi.core.models.Position;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class StockServiceImpl implements StockService {
 
     private final InvestApi investApi;
 
-    private final StockMapper stockMapper;
-
     @Override
-    public List<StockDto> getAllStocks() {
-        log.info("Entering getAllStocks service method...");
-        List<Share> stocks = null;
+    public List<StockDto> getAllUserStocks(String accountId) {
+        Portfolio portfolio = investApi.getOperationsService().getPortfolioSync(accountId);
+        List<Position> positions = portfolio.getPositions();
 
-        try {
-            stocks = investApi.getInstrumentsService()
-                    .getAllShares()
-                    .get().subList(0, 200);
-            log.info("Getting stocks from api - {}", (stocks != null));
-        } catch (Exception e) {
-            log.error("Bad request to external api...");
-        }
+        /*
+        TODO Получать с аккаунта(портфолио) список позиций,
+         искать из них Акции, кастить к нашей dtoшке и возвращать списком
+        */
 
-        if (stocks == null) {
-            throw new CannotProceedApiRequestException("Не удалось получить список акций на рынке");
-        }
-
-        return stockMapper.toDto(stocks);
+        return null;
     }
-
-
 }

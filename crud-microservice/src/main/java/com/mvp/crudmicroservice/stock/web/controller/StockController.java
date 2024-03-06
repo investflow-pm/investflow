@@ -18,5 +18,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StockController {
 
+    /*
+    TODO Написать ручки для получения StockDto
+     с invest-microservice и сохранять их в бд
+    */
 
 }
