@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BondService {
 
-    Bond add(Bond stock, Long userId, Long count);
+    Bond add(Bond bond, Long userId, Long count);
 
     List<Bond> getAllByUserId(Long userId);
 }
