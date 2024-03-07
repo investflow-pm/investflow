@@ -1,12 +1,13 @@
 package com.mvp.investservice.service.impl;
 
+import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.core.InvestApi;
-import ru.tinkoff.piapi.core.models.Portfolio;
-import ru.tinkoff.piapi.core.models.Position;
 
 import java.util.List;
 
@@ -16,16 +17,19 @@ public class StockServiceImpl implements StockService {
 
     private final InvestApi investApi;
 
+    private final StockMapper stockMapper;
+
     @Override
-    public List<StockDto> getAllUserStocks(String accountId) {
-        Portfolio portfolio = investApi.getOperationsService().getPortfolioSync(accountId);
-        List<Position> positions = portfolio.getPositions();
+    public StockDto getStockByName(String name) {
 
-        /*
-        TODO Получать с аккаунта(портфолио) список позиций,
-         искать из них Акции, кастить к нашей dtoшке и возвращать списком
-        */
+        List<Share> shares = investApi.getInstrumentsService()
+                .getAllSharesSync();
 
-        return null;
+        Share share = shares.stream()
+                .filter(e -> e.getName().contains(name))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("There is no Share with name " + name));
+
+        return stockMapper.toDto(share);
     }
 }

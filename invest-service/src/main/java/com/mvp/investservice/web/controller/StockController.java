@@ -5,11 +5,10 @@ import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/invest/accounts/stocks")
@@ -25,9 +24,9 @@ public class StockController {
           покупки акции, продажи)
     */
 
-    @GetMapping("/{accountId}")
-    public List<StockDto> getAllUserStocks(@PathVariable String accountId) {
-        return stockService.getAllUserStocks(accountId);
+    @GetMapping
+    public StockDto getStockByName(@RequestParam String name) {
+        return stockService.getStockByName(name);
     }
 
 }
