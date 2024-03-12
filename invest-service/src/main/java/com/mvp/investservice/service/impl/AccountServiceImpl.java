@@ -4,6 +4,7 @@ import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.AccountService;
 import com.mvp.investservice.service.props.LinkProperties;
 import com.mvp.investservice.web.dto.AccountDto;
+import com.mvp.investservice.web.dto.BalanceDto;
 import com.mvp.investservice.web.dto.PayInDto;
 import com.mvp.investservice.web.dto.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -54,12 +55,17 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public MoneyValue payIn(PayInDto payInDto) {
+    public BalanceDto payIn(PayInDto payInDto) {
         MoneyValue moneyValue = getMoneyValue(payInDto);
         MoneyValue balance
                 = investApi.getSandboxService().payInSync(payInDto.getAccountId(), moneyValue);
-        System.out.println();
-        return balance;
+        BigDecimal newBalance
+                = balance.getUnits() == 0 && balance.getNano() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(balance.getUnits()).add(BigDecimal.valueOf(balance.getNano(), 9));
+
+        BalanceDto balanceDto = new BalanceDto();
+        balanceDto.setAddedMoney(payInDto.getMoneyToPay().toString());
+        balanceDto.setBalance(newBalance.toString());
+        return balanceDto;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.mvp.investservice.service;
 
+import com.mvp.investservice.web.dto.BalanceDto;
 import com.mvp.investservice.web.dto.PayInDto;
 import com.mvp.investservice.web.dto.AccountDto;
 import ru.tinkoff.piapi.contract.v1.MoneyValue;
@@ -10,5 +11,5 @@ public interface AccountService {
 
     AccountDto getAccount();
 
-    MoneyValue payIn(PayInDto payInDto);
+    BalanceDto payIn(PayInDto payInDto);
 }
