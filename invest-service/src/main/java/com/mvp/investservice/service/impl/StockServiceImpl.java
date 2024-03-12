@@ -72,12 +72,15 @@ public class StockServiceImpl implements StockService {
     @Override
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
 
+        // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
+        /*
         List<Share> allSharesSync = investApi.getInstrumentsService()
                 .getAllSharesSync();
 
         List<Share> shares
                 = allSharesSync.stream()
                 .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
+        */
 
         Share shareToBuy = investApi.getInstrumentsService()
                 .getShareByFigiSync(purchaseDto.getFigi());
@@ -94,17 +97,27 @@ public class StockServiceImpl implements StockService {
                 throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
             }
 
-            StockDto stockDto = stockMapper.toDto(shareToBuy);
-
-            OrderResponse<StockDto> orderResponse = new OrderResponse<>();
-            orderResponse.setOrderId(postOrderResponse.getOrderId());
-            orderResponse.setPrice(price.toString());
-            orderResponse.setAsset(stockDto);
-
-            return orderResponse;
+            return generateOrderResponse(shareToBuy, price, postOrderResponse);
         } else {
             throw new BuyUnavailableException("You can not buy the share now");
         }
+    }
+
+    /**
+     * Метод по генерации ответа по покупке акции
+     * @param shareToBuy - акция, которая будет куплена пользователем
+     * @param price - цена покупки
+     * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
+     * @return
+     */
+    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, BigDecimal price, PostOrderResponse postOrderResponse) {
+        StockDto stockDto = stockMapper.toDto(shareToBuy);
+
+        OrderResponse<StockDto> orderResponse = new OrderResponse<>();
+        orderResponse.setOrderId(postOrderResponse.getOrderId());
+        orderResponse.setPrice(price.toString());
+        orderResponse.setAsset(stockDto);
+        return orderResponse;
     }
 
     /**
