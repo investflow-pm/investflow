@@ -41,7 +41,6 @@ public class AccountServiceImpl implements AccountService {
         AccountDto accountDto = new AccountDto();
         accountDto.setInvestAccountId(accountId);
         accountDto.setUserDto(userDto);
-        accountDto.setBalance(new BigDecimal("0.0"));
 
         HttpEntity<AccountDto> request = new HttpEntity<>(accountDto);
         ResponseEntity<AccountDto> response

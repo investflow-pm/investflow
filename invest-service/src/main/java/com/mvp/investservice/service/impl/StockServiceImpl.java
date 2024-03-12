@@ -86,9 +86,13 @@ public class StockServiceImpl implements StockService {
         if (shareToBuy.getBuyAvailableFlag()) {
             String figi = shareToBuy.getFigi();
             Quotation resultPrice = getPurchasePrice(figi);
-
-            PostOrderResponse postOrderResponse = investApi.getOrdersService()
-                    .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
+            PostOrderResponse postOrderResponse;
+            try {
+                postOrderResponse = investApi.getOrdersService()
+                        .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
+            } catch (Exception e) {
+                throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
+            }
 
             OrderResponse orderResponse = new OrderResponse();
             orderResponse.setOrderId(postOrderResponse.getOrderId());
