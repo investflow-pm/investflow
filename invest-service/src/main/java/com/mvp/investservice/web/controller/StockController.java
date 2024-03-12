@@ -7,7 +7,6 @@ import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.tinkoff.piapi.contract.v1.PostOrderResponse;
 
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class StockController {
     }
 
     @PostMapping("/buy")
-    public OrderResponse buyStock(@RequestBody PurchaseDto purchaseDto) {
+    public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
         return stockService.buyStock(purchaseDto);
     }
 }

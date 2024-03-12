@@ -12,5 +12,4 @@ public class StockDto {
     private String currency;
     private String countryOfRiskName;
     private int lots;
-    private int sharesPerLot;
 }
