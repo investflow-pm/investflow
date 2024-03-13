@@ -69,6 +69,11 @@ public class StockServiceImpl implements StockService {
         return stockDtos;
     }
 
+    // TODO
+    //  1) Проверить проверку работы покупки акций,
+    //  где лот из нескольких лотов (BBG000LNHHJ9)
+    //  2) Написать ControllerAdvice для обработки ошибок
+
     @Override
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
 
@@ -112,7 +117,7 @@ public class StockServiceImpl implements StockService {
      */
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, BigDecimal price, PostOrderResponse postOrderResponse) {
         StockDto stockDto = stockMapper.toDto(shareToBuy);
-
+        stockDto.setLots((int) postOrderResponse.getLotsExecuted());
         OrderResponse<StockDto> orderResponse = new OrderResponse<>();
         orderResponse.setOrderId(postOrderResponse.getOrderId());
         orderResponse.setPrice(price.toString());
