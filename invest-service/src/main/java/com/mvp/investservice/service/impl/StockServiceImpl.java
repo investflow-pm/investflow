@@ -1,8 +1,10 @@
 package com.mvp.investservice.service.impl;
 
+import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
+import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.StockDto;
@@ -78,19 +80,24 @@ public class StockServiceImpl implements StockService {
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
 
         // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
-        /*
+
         List<Share> allSharesSync = investApi.getInstrumentsService()
                 .getAllSharesSync();
 
         List<Share> shares
                 = allSharesSync.stream()
                 .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
-        */
 
-        Share shareToBuy = investApi.getInstrumentsService()
-                .getShareByFigiSync(purchaseDto.getFigi());
 
-        if (shareToBuy.getBuyAvailableFlag()) {
+        Share shareToBuy;
+        try {
+            shareToBuy = investApi.getInstrumentsService()
+                    .getShareByFigiSync(purchaseDto.getFigi());
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
+
+        if (shareToBuy.getBuyAvailableFlag() && shareToBuy.getApiTradeAvailableFlag()) {
             String figi = shareToBuy.getFigi();
             BigDecimal price = getBigDecimalPrice(figi);
             Quotation resultPrice = getPurchasePrice(price);
@@ -99,28 +106,36 @@ public class StockServiceImpl implements StockService {
                 postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
             } catch (Exception e) {
-                throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
+                throw new BuyUnavailableException(e.getMessage());
             }
 
-            return generateOrderResponse(shareToBuy, price, postOrderResponse);
+            return generateOrderResponse(shareToBuy, postOrderResponse);
         } else {
-            throw new BuyUnavailableException("You can not buy the share now");
+            throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
         }
     }
 
     /**
      * Метод по генерации ответа по покупке акции
      * @param shareToBuy - акция, которая будет куплена пользователем
-     * @param price - цена покупки
      * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
      * @return
      */
-    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, BigDecimal price, PostOrderResponse postOrderResponse) {
+    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
         StockDto stockDto = stockMapper.toDto(shareToBuy);
-        stockDto.setLots((int) postOrderResponse.getLotsExecuted());
+
+        return setOrderResponseFields(postOrderResponse, stockDto);
+    }
+
+    private OrderResponse<StockDto> setOrderResponseFields(PostOrderResponse postOrderResponse, StockDto stockDto) {
         OrderResponse<StockDto> orderResponse = new OrderResponse<>();
         orderResponse.setOrderId(postOrderResponse.getOrderId());
-        orderResponse.setPrice(price.toString());
+        orderResponse.setExecutionStatus(postOrderResponse.getExecutionReportStatus().name());
+        orderResponse.setLotRequested((int) postOrderResponse.getLotsRequested());
+        orderResponse.setLotExecuted((int) postOrderResponse.getLotsExecuted());
+        orderResponse.setInitialOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getInitialOrderPrice()));
+        orderResponse.setExecutedOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getExecutedOrderPrice()));
+        orderResponse.setTotalOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getTotalOrderAmount()));
         orderResponse.setAsset(stockDto);
         return orderResponse;
     }

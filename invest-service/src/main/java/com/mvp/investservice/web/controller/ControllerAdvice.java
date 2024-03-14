@@ -1,9 +1,6 @@
 package com.mvp.investservice.web.controller;
 
-import com.mvp.investservice.domain.exception.CannotProceedApiRequestException;
-import com.mvp.investservice.domain.exception.ExceptionBody;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
-import com.mvp.investservice.domain.exception.UpdateException;
+import com.mvp.investservice.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,6 +23,18 @@ public class ControllerAdvice {
     @ExceptionHandler(CannotProceedApiRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionBody handleApiRequestException(CannotProceedApiRequestException exception) {
+        return new ExceptionBody(exception.getMessage());
+    }
+
+    @ExceptionHandler({BuyUnavailableException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionBody handleBuyUnavailableException(BuyUnavailableException exception) {
+        return new ExceptionBody(exception.getMessage());
+    }
+
+    @ExceptionHandler(AssetNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionBody handleAssetNotFoundException(AssetNotFoundException exception) {
         return new ExceptionBody(exception.getMessage());
     }
 
