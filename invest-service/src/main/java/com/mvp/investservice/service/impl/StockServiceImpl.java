@@ -80,14 +80,14 @@ public class StockServiceImpl implements StockService {
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
 
         // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
-
+        /*
         List<Share> allSharesSync = investApi.getInstrumentsService()
                 .getAllSharesSync();
 
         List<Share> shares
                 = allSharesSync.stream()
                 .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
-
+        */
 
         Share shareToBuy;
         try {
