@@ -2,31 +2,39 @@ package com.mvp.investservice.web.controller;
 
 
 import com.mvp.investservice.service.StockService;
+import com.mvp.investservice.web.dto.OrderResponse;
+import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.StockDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
-@RequestMapping("api/v1/invest/accounts/stocks")
+@RequestMapping("api/v1/invest/stocks")
 @RequiredArgsConstructor
 public class StockController {
 
     private final StockService stockService;
 
-    /*
-        TODO
-         Описать ручки по получению всех акций,
-          определённой акции по имени, тикеру,
-          покупки акции, продажи)
-    */
-
-    @GetMapping
-    public StockDto getStockByName(@RequestParam String name) {
-        return stockService.getStockByName(name);
+    @GetMapping("/{stockName}")
+    public StockDto getStockByName(@PathVariable String stockName) {
+        return stockService.getStockByName(stockName);
     }
 
+    @GetMapping()
+    public List<StockDto> getAllStocks() {
+        return stockService.getStocks();
+    }
+
+    @GetMapping("/sector/{sectorName}")
+    public List<StockDto> getStocksBySector(@PathVariable String sectorName) {
+        return stockService.getStocksBySector(sectorName);
+    }
+
+    @PostMapping("/buy")
+    public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
+        return stockService.buyStock(purchaseDto);
+    }
 }
