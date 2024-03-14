@@ -1,5 +1,6 @@
 package com.mvp.investservice.service.impl;
 
+import com.mvp.investservice.domain.exception.CannotProceedApiRequestException;
 import com.mvp.investservice.service.OperationService;
 import com.mvp.investservice.web.dto.AccountDto;
 import com.mvp.investservice.web.dto.OperationResponse;
@@ -25,8 +26,14 @@ public class OperationServiceImpl implements OperationService {
 
     @Override
     public List<OperationResponse> getAllOperations(AccountDto accountDto) {
-        List<Operation> allOperations = investApi.getOperationsService()
-                .getAllOperationsSync(accountDto.getInvestAccountId(), Instant.now().minus(1, ChronoUnit.DAYS), Instant.now());
+        List<Operation> allOperations = new ArrayList<>();
+        try {
+
+            allOperations = investApi.getOperationsService()
+                    .getAllOperationsSync(accountDto.getInvestAccountId(), Instant.now().minus(1, ChronoUnit.DAYS), Instant.now());
+        } catch (Exception e) {
+            throw new CannotProceedApiRequestException("Ошибка получения операций по счёту.");
+        }
 
         List<OperationResponse> operations = new ArrayList<>();
         for (Operation operation : allOperations) {

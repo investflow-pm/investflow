@@ -1,5 +1,6 @@
 package com.mvp.investservice.web.controller;
 
+import com.mvp.investservice.domain.exception.CannotProceedApiRequestException;
 import com.mvp.investservice.domain.exception.ExceptionBody;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.domain.exception.UpdateException;
@@ -19,6 +20,12 @@ public class ControllerAdvice {
 
     @ExceptionHandler(UpdateException.class)
     public ExceptionBody handleUpdateException(UpdateException exception) {
+        return new ExceptionBody(exception.getMessage());
+    }
+
+    @ExceptionHandler(CannotProceedApiRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionBody handleApiRequestException(CannotProceedApiRequestException exception) {
         return new ExceptionBody(exception.getMessage());
     }
 
