@@ -10,23 +10,25 @@ public class OperationResponse {
 
     private String operationId;
 
-    private String currency;
-
-    private BigDecimal payment;
-
-    private BigDecimal price;
-
-    private BigDecimal lotPrice;
-
-    private String operationState;
-
-    private String operationType;
-
-    private String figi;
+    private String instrumentType;
 
     private String assetName;
 
-    private String instrumentType;
+    private String figi;
+
+    private String currency;
+
+    private String operationType;
+
+    private String operationState;
+
+    private int quantity;
+
+    private BigDecimal payment;
+
+    private BigDecimal instrumentPrice;
+
+    private BigDecimal lotPrice;
 
     private LocalDateTime operationDate;
 }

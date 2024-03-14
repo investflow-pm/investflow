@@ -26,8 +26,16 @@ public class OperationMapper {
         operationResponse.setInstrumentType(operation.getInstrumentType());
         operationResponse.setPayment(MoneyParser.moneyValueToBigDecimal(operation.getPayment()));
         operationResponse.setOperationType(operation.getOperationType().name());
-        operationResponse.setPrice(MoneyParser.moneyValueToBigDecimal(operation.getPrice()));
-        operationResponse.setLotPrice(operationResponse.getPrice().multiply(BigDecimal.valueOf(lot)));
+        operationResponse.setInstrumentPrice(MoneyParser.moneyValueToBigDecimal(operation.getPrice()));
+        operationResponse.setLotPrice(operationResponse.getInstrumentPrice().multiply(BigDecimal.valueOf(lot)));
+
+        if (operationResponse.getInstrumentPrice().compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal quantity = operationResponse.getPayment()
+                    .divide(BigDecimal.valueOf(-1)
+                            .multiply(operationResponse.getInstrumentPrice()));
+
+            operationResponse.setQuantity(quantity.intValue());
+        }
 
         return operationResponse;
     }

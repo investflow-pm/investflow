@@ -6,7 +6,6 @@ import com.mvp.investservice.web.dto.OperationResponse;
 import com.mvp.investservice.web.mapper.OperationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.tinkoff.piapi.contract.v1.AssetFull;
 import ru.tinkoff.piapi.contract.v1.Instrument;
 import ru.tinkoff.piapi.contract.v1.Operation;
 import ru.tinkoff.piapi.core.InvestApi;
@@ -15,7 +14,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
