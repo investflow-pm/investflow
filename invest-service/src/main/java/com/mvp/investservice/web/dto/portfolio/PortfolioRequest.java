@@ -1,4 +1,4 @@
-package com.mvp.investservice.web.dto;
+package com.mvp.investservice.web.dto.portfolio;
 
 import lombok.Data;
 
@@ -7,5 +7,4 @@ public class PortfolioRequest {
 
     private String accountId;
 
-    private String currency;
 }

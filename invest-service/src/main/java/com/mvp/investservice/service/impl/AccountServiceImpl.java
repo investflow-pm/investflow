@@ -6,7 +6,7 @@ import com.mvp.investservice.service.props.LinkProperties;
 import com.mvp.investservice.web.dto.AccountDto;
 import com.mvp.investservice.web.dto.BalanceDto;
 import com.mvp.investservice.web.dto.PayInDto;
-import com.mvp.investservice.web.dto.UserDto;
+import com.mvp.investservice.web.dto.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;

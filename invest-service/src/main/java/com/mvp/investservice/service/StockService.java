@@ -2,7 +2,7 @@ package com.mvp.investservice.service;
 
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 
 import java.util.List;
 

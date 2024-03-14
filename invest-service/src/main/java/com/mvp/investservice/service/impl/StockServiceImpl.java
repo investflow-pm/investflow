@@ -7,7 +7,7 @@ import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

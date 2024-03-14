@@ -1,6 +1,6 @@
 package com.mvp.investservice.web.mapper;
 
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.Share;
 

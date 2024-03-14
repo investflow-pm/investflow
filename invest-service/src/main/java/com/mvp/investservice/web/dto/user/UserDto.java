@@ -1,4 +1,4 @@
-package com.mvp.investservice.web.dto;
+package com.mvp.investservice.web.dto.user;
 
 import lombok.Data;
 
