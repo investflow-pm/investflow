@@ -4,7 +4,7 @@ package com.mvp.investservice.web.controller;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
