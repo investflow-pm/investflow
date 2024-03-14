@@ -1,0 +1,86 @@
+version: '3'
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+
+  auth-microservice:
+    build:
+      context: ./
+      dockerfile: auth-microservice/Dockerfile
+    image: auth-microservice
+    ports:
+      - "9099:9099"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+      - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
+    depends_on:
+      - db
+
+  crud-microservice:
+    build:
+      context: ./
+      dockerfile: crud-microservice/Dockerfile
+    image: crud-microservice
+    ports:
+      - "9097:9097"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+    depends_on:
+      - db
+#
+
+  invest-service:
+    build:
+      context: ./
+      dockerfile: invest-service/Dockerfile
+    image: invest-service
+    ports:
+      - "9098:9098"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+    depends_on:
+      - db
+      
+  frontend:
+    build:
+      context: ./
+      dockerfile: frontend/Dockerfile
+    image: frontend
+    ports:
+      - "9095:9095"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+    depends_on:
+      - db
+
+  tg-bot:
+    build:
+      context: ./
+      dockerfile: tg-bot/Dockerfile
+    image: tg-bot
+    ports:
+      - "9096:9096"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+    depends_on:
+      - db
+      
+networks:
+  investflow_network:
+    driver: bridge
