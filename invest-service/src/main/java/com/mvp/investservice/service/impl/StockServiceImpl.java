@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,41 +69,87 @@ public class StockServiceImpl implements StockService {
         return stockDtos;
     }
 
-    @Override
-    public OrderResponse buyStock(PurchaseDto purchaseDto) {
+    // TODO
+    //  1) Проверить проверку работы покупки акций,
+    //  где лот из нескольких лотов (BBG000LNHHJ9)
+    //  2) Написать ControllerAdvice для обработки ошибок
 
+    @Override
+    public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
+
+        // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
+        /*
         List<Share> allSharesSync = investApi.getInstrumentsService()
                 .getAllSharesSync();
 
         List<Share> shares
                 = allSharesSync.stream()
                 .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
+        */
 
         Share shareToBuy = investApi.getInstrumentsService()
                 .getShareByFigiSync(purchaseDto.getFigi());
 
         if (shareToBuy.getBuyAvailableFlag()) {
             String figi = shareToBuy.getFigi();
-            Quotation resultPrice = getPurchasePrice(figi);
+            BigDecimal price = getBigDecimalPrice(figi);
+            Quotation resultPrice = getPurchasePrice(price);
+            PostOrderResponse postOrderResponse;
+            try {
+                postOrderResponse = investApi.getOrdersService()
+                        .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
+            } catch (Exception e) {
+                throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
+            }
 
-            PostOrderResponse postOrderResponse = investApi.getOrdersService()
-                    .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
-
-            OrderResponse orderResponse = new OrderResponse();
-            orderResponse.setOrderId(postOrderResponse.getOrderId());
-            return orderResponse;
+            return generateOrderResponse(shareToBuy, price, postOrderResponse);
         } else {
             throw new BuyUnavailableException("You can not buy the share now");
         }
     }
 
     /**
+     * Метод по генерации ответа по покупке акции
+     * @param shareToBuy - акция, которая будет куплена пользователем
+     * @param price - цена покупки
+     * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
+     * @return
+     */
+    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, BigDecimal price, PostOrderResponse postOrderResponse) {
+        StockDto stockDto = stockMapper.toDto(shareToBuy);
+        stockDto.setLots((int) postOrderResponse.getLotsExecuted());
+        OrderResponse<StockDto> orderResponse = new OrderResponse<>();
+        orderResponse.setOrderId(postOrderResponse.getOrderId());
+        orderResponse.setPrice(price.toString());
+        orderResponse.setAsset(stockDto);
+        return orderResponse;
+    }
+
+    /**
      * Получение цены акции по figi
      * для последущего выставления заявки на покупку
-     * @param figi
+     *
+     * @param price
      * @return Quotation (units - рубли, nanos - копейки)
      */
-    private Quotation getPurchasePrice(String figi) {
+    private Quotation getPurchasePrice(BigDecimal price) {
+
+        return Quotation.newBuilder()
+                .setUnits(price != null ? price.longValue() : 0)
+                .setNano(price != null ? price.remainder(BigDecimal.ONE)
+                        .multiply(BigDecimal.valueOf(1000000000)).intValue() : 0)
+                .build();
+    }
+
+    /**
+     * Просмежуточное получение цены акции
+     * в виде BigDecimal
+     *
+     * @param figi
+     * @return
+     */
+
+    private BigDecimal getBigDecimalPrice(String figi) {
         Quotation shareLastPrice = investApi.getMarketDataService()
                 .getLastPricesSync(List.of(figi)).get(0)
                 .getPrice();
@@ -119,11 +164,6 @@ public class StockServiceImpl implements StockService {
 
         BigDecimal price
                 = lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
-
-        Quotation resultPrice = Quotation.newBuilder()
-                .setUnits(price != null ? price.longValue() : 0)
-                .setNano(price != null ? price.remainder(BigDecimal.ONE).multiply(BigDecimal.valueOf(1000000000)).intValue() : 0)
-                .build();
-        return resultPrice;
+        return price;
     }
 }

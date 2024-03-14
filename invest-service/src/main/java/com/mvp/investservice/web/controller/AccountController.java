@@ -1,11 +1,11 @@
 package com.mvp.investservice.web.controller;
 
 import com.mvp.investservice.service.AccountService;
-import com.mvp.investservice.web.dto.PayInDto;
 import com.mvp.investservice.web.dto.AccountDto;
+import com.mvp.investservice.web.dto.BalanceDto;
+import com.mvp.investservice.web.dto.PayInDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.tinkoff.piapi.contract.v1.MoneyValue;
 
 @RestController
 @RequestMapping("api/v1/invest/accounts")
@@ -20,7 +20,7 @@ public class AccountController {
     }
 
     @PutMapping()
-    public MoneyValue payIn(@RequestBody PayInDto payInDto) {
+    public BalanceDto payIn(@RequestBody PayInDto payInDto) {
         return accountService.payIn(payInDto);
     }
 
