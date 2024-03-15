@@ -18,12 +18,12 @@ public class StockController {
 
     private final StockService stockService;
 
-    @GetMapping("/{stockName}")
-    public StockDto getStockByName(@PathVariable String stockName) {
+    @GetMapping
+    public StockDto getStockByName(@RequestParam(value = "name") String stockName) {
         return stockService.getStockByName(stockName);
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public List<StockDto> getAllStocks() {
         return stockService.getStocks();
     }

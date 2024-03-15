@@ -36,7 +36,7 @@ public class StockServiceImpl implements StockService {
         Share share = shares.stream()
                 .filter(e -> e.getName().contains(name))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("There is no Share with name " + name));
+                .orElseThrow(() -> new ResourceNotFoundException("Не удалось найти акцию " + name));
 
         return stockMapper.toDto(share);
     }
@@ -57,7 +57,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<StockDto> getStocksBySector(String sectorName) {
         List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync();
+                .getAllSharesSync().subList(0, 200);
 
         List<Share> sectorShares = shares.stream()
                 .filter(e -> e.getSector().equals(sectorName))
@@ -71,24 +71,8 @@ public class StockServiceImpl implements StockService {
         return stockDtos;
     }
 
-    // TODO
-    //  1) Проверить проверку работы покупки акций,
-    //  где лот из нескольких лотов (BBG000LNHHJ9)
-    //  2) Написать ControllerAdvice для обработки ошибок
-
     @Override
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
-
-        // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
-        /*
-        List<Share> allSharesSync = investApi.getInstrumentsService()
-                .getAllSharesSync();
-
-        List<Share> shares
-                = allSharesSync.stream()
-                .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
-        */
-
         Share shareToBuy;
         try {
             shareToBuy = investApi.getInstrumentsService()
