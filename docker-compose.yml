@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: postgres:14.1-alpine
+    image: postgres:16.2
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -37,7 +37,6 @@ services:
       - JAVA_OPTS=-Xmx512M
     depends_on:
       - db
-#
 
   invest-service:
     build:
@@ -51,7 +50,8 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
     depends_on:
-      - db
+      - crud-microservice
+      - auth-microservice
       
   frontend:
     build:
@@ -65,7 +65,8 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
     depends_on:
-      - db
+      - crud-microservice
+      - auth-microservice
 
   tg-bot:
     build:
@@ -79,7 +80,8 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
     depends_on:
-      - db
+      - crud-microservice
+      - auth-microservice
       
 networks:
   investflow_network:

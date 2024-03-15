@@ -6,10 +6,10 @@ spring:
   main:
     allow-circular-references: true
 
-  datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/
-    username: postgres
-    password: postgres
+#  datasource:
+#    url: jdbc:postgresql://127.0.0.1:5432/
+#    username: postgres
+#    password: postgres
 
   jpa:
     database: POSTGRESQL
