@@ -1,6 +1,5 @@
 package com.mvp.crudmicroservice.user.service.impl;
 
-import com.mvp.crudmicroservice.user.domain.exception.AccountAlreadyExistsException;
 import com.mvp.crudmicroservice.user.domain.exception.ResourceNotFoundException;
 import com.mvp.crudmicroservice.user.domain.user.Account;
 import com.mvp.crudmicroservice.user.domain.user.User;

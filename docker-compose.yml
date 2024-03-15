@@ -8,6 +8,8 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - '5432:5432'
+    networks:
+      - investflow_network
 
   auth-microservice:
     build:
@@ -21,8 +23,8 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
       - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
-    depends_on:
-      - db
+#    depends_on:
+#      - db
 
   crud-microservice:
     build:
