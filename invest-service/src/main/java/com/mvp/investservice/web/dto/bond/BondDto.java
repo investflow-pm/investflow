@@ -30,4 +30,6 @@ public class BondDto extends Asset {
     private String sector;
 
     private RiskLevel riskLevel;
+
+    // TODO: add current price???????????
 }

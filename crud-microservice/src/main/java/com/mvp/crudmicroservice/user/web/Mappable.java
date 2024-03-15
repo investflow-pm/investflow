@@ -1,4 +1,4 @@
-package com.mvp.crudmicroservice;
+package com.mvp.crudmicroservice.user.web;
 
 import org.mapstruct.SubclassMapping;
 

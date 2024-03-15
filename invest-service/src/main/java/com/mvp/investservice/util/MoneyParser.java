@@ -4,6 +4,8 @@ import ru.tinkoff.piapi.contract.v1.MoneyValue;
 
 import java.math.BigDecimal;
 
+import static ru.tinkoff.piapi.core.utils.MapperUtils.quotationToBigDecimal;
+
 public class MoneyParser {
 
     public static BigDecimal moneyValueToBigDecimal(MoneyValue moneyValue) {
