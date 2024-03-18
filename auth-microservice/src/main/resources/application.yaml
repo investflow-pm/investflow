@@ -5,10 +5,6 @@ spring:
     import: optional:file:.env[.properties]
   main:
     allow-circular-references: true
-#  datasource:
-#    url: jdbc:postgresql://127.0.0.1:5432/
-#    username: postgres
-#    password: postgres
 
 security:
   jwt:
@@ -17,4 +13,4 @@ security:
     refresh: 30
 
 rest:
-  userServiceLink: http://localhost:9097/api/v1/crud/users
+  userServiceLink: ${USER_SERVICE_LINK}

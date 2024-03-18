@@ -11,6 +11,23 @@ services:
     networks:
       - investflow_network
 
+  crud-microservice:
+    build:
+      context: ./
+      dockerfile: crud-microservice/Dockerfile
+    image: crud-microservice
+    ports:
+      - "9097:9097"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+      - DATABASE_URL=jdbc:postgresql://db:5432/
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+    depends_on:
+      - db
+
   auth-microservice:
     build:
       context: ./
@@ -23,22 +40,9 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
       - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
-#    depends_on:
-#      - db
-
-  crud-microservice:
-    build:
-      context: ./
-      dockerfile: crud-microservice/Dockerfile
-    image: crud-microservice
-    ports:
-      - "9097:9097"
-    networks:
-      - investflow_network
-    environment:
-      - JAVA_OPTS=-Xmx512M
+      - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
     depends_on:
-      - db
+      - crud-microservice
 
   invest-service:
     build:
@@ -51,6 +55,10 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
+      - TOKEN=t.VqnElEfrPsAXQfuhO8JgcnOUhpz9dI3dNq6yFntZaSuRtU7eKgBNusIpTIifs14jsPfI5hRl47JXsByKqWGMFg
+      - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
+      - CREATE_ACCOUNT_LINK=http://crud-microservice:9097/api/v1/crud/users/accounts
+      - ACCOUNT_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/accounts
     depends_on:
       - crud-microservice
       - auth-microservice
@@ -67,8 +75,7 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
     depends_on:
-      - crud-microservice
-      - auth-microservice
+      - invest-service
 
   tg-bot:
     build:
@@ -81,9 +88,11 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
+      - BOT_NAME=T-Investments_bot
+      - BOT_TOKEN=6704956257:AAHi8I6zB14jvUnAqkEWFtcNNTL51_BEuME
+      - COMMAND_START_PICTURE=https://avatars.githubusercontent.com/u/160784827?s=200&v=4
     depends_on:
-      - crud-microservice
-      - auth-microservice
+      - invest-service
       
 networks:
   investflow_network:
