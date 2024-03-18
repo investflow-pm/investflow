@@ -2,6 +2,7 @@ package com.yaroslavyankov.frontend.view;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
@@ -59,7 +60,7 @@ public class LoginView extends VerticalLayout {
             }
 
         });
-
-        add(appName, loginHeader, usernameField, passwordField, loginButton);
+        Anchor registerLink = new Anchor("register", "Регистрация");
+        add(appName, loginHeader, usernameField, passwordField, loginButton, registerLink);
     }
 }
