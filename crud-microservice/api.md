@@ -2,7 +2,7 @@
 
 ### Регистрация
 
-## `` POST api/v1/crud/users/ ``
+## `` POST api/v1/crud/users ``
 
 Тело запроса
 
