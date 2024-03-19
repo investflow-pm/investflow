@@ -1,4 +1,7 @@
 version: '3'
+volumes:
+  postgres_data:
+
 services:
   db:
     image: postgres:16.2
@@ -6,10 +9,13 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=investdb
     ports:
       - '5432:5432'
     networks:
       - investflow_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   crud-microservice:
     build:
@@ -22,7 +28,7 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
-      - DATABASE_URL=jdbc:postgresql://db:5432/
+      - DATABASE_URL=jdbc:postgresql://db:5432/investdb
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
     depends_on:
@@ -69,7 +75,7 @@ services:
       dockerfile: frontend/Dockerfile
     image: frontend
     ports:
-      - "9095:9095"
+      - "9100:9100"
     networks:
       - investflow_network
     environment:
