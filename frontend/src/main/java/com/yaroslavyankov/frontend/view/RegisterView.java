@@ -11,6 +11,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.yaroslavyankov.frontend.dto.user.UserDto;
+import com.yaroslavyankov.frontend.props.AuthLinkProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -21,13 +22,17 @@ public class RegisterView extends VerticalLayout {
 
     private final RestTemplate restTemplate;
 
-    public RegisterView(RestTemplate restTemplate) {
+    private final AuthLinkProperties authLinkProperties;
+
+    public RegisterView(RestTemplate restTemplate, AuthLinkProperties authLinkProperties) {
         addClassName("register-view");
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
 
         this.restTemplate = restTemplate;
+        this.authLinkProperties = authLinkProperties;
+
         H1 appName = new H1("Investflow");
         H2 registerHeader = new H2("Регистрация");
         TextField nameField = new TextField("Имя");
@@ -46,7 +51,7 @@ public class RegisterView extends VerticalLayout {
             UserDto userDto = getUserDto(name, username, password);
             try {
                 UserDto response
-                        = restTemplate.postForObject("http://localhost:9099/api/v1/auth/register", userDto, UserDto.class);
+                        = restTemplate.postForObject(authLinkProperties.getRegisterLink(), userDto, UserDto.class);
                 if (response != null) {
                     UI.getCurrent().navigate("/login");
                 }

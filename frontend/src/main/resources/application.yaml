@@ -1,2 +1,10 @@
 server:
   port: 9100
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+auth:
+  loginLink: ${LOGIN_USER_LINK}
+  registerLink: ${REGISTER_USER_LINK}

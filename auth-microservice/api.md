@@ -9,7 +9,7 @@
 ```bash
 {
    
-  "usernameOrEmail": "почта или имя пользователя",
+  "username": "почта или имя пользователя",
   "password": "пароль"
 
 }
@@ -43,9 +43,9 @@
 
 ```bash
 {
-  "username": "имя пользователя",
-  "email": "почта пользователя",
-  "password": "пароль"
+    "name": "Yaroslav Yankov",
+    "username": "yaroslav@gmail.com",
+    "password": "password"
 }
 ```
 
