@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.yaroslavyankov.frontend.dto.auth.JwtRequest;
 import com.yaroslavyankov.frontend.dto.auth.JwtResponse;
+import com.yaroslavyankov.frontend.props.AuthLinkProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -24,7 +25,9 @@ public class LoginView extends VerticalLayout {
 
     private final RestTemplate restTemplate;
 
-    public LoginView(RestTemplate restTemplate) {
+    private final AuthLinkProperties authLinkProperties;
+
+    public LoginView(RestTemplate restTemplate, AuthLinkProperties authLinkProperties) {
         addClassName("login-view");
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -32,6 +35,8 @@ public class LoginView extends VerticalLayout {
 
 
         this.restTemplate = restTemplate;
+        this.authLinkProperties = authLinkProperties;
+
         H1 appName = new H1("Investflow");
         H2 loginHeader = new H2("Login");
         TextField usernameField = new TextField("Username");
@@ -44,7 +49,7 @@ public class LoginView extends VerticalLayout {
 
             try {
                 JwtResponse response
-                        = restTemplate.postForObject("http://localhost:9099/api/v1/auth/login", loginRequest, JwtResponse.class);
+                        = restTemplate.postForObject(authLinkProperties.getLoginLink(), loginRequest, JwtResponse.class);
                 if (response != null) {
                     VaadinSession.getCurrent().setAttribute("userId", response.getId());
                     VaadinSession.getCurrent().setAttribute("username", response.getUsername());
