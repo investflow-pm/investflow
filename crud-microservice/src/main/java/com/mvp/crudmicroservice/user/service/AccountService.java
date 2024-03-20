@@ -9,4 +9,6 @@ public interface AccountService {
     Account update(Account account);
 
     Account getById(String accountId);
+
+    Account getByUserId(Long userId);
 }

@@ -4,6 +4,7 @@ import com.yaroslavyankov.authmicroservice.service.AuthService;
 import com.yaroslavyankov.authmicroservice.web.dto.UserDto;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtRequest;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtResponse;
+import com.yaroslavyankov.authmicroservice.web.dto.auth.RegisteredUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public UserDto register(@RequestBody final UserDto userDto) {
+    public RegisteredUser register(@RequestBody final UserDto userDto) {
         return authService.register(userDto);
     }
 
