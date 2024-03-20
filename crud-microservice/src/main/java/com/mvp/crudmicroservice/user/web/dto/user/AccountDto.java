@@ -11,4 +11,5 @@ public class AccountDto {
 
     private UserDto userDto;
 
+    private TelegramDto telegramDto;
 }
