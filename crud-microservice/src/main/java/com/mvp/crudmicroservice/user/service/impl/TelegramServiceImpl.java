@@ -18,14 +18,12 @@ public class TelegramServiceImpl implements TelegramService {
 
     private final TelegramRepository telegramRepository;
     @Override
-    @Transactional(readOnly = true)
     public Telegram getById(Long id) {
         return telegramRepository.findById(id.toString())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("There is no telegram with id %d", id)));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Telegram getByTelegramId(String telegramId) {
         return telegramRepository.findByTelegramId(telegramId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -33,14 +31,12 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    @Transactional
     public Telegram update(Telegram telegram) {
         telegramRepository.save(telegram);
         return telegram;
     }
 
     @Override
-    @Transactional
     public Telegram create(Telegram telegram) {
         Optional<Telegram> existTelegram = telegramRepository.findByTelegramId(telegram.getTelegramId());
         if (existTelegram.isEmpty()) {

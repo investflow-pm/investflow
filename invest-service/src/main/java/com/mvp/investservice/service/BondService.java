@@ -11,7 +11,7 @@ public interface BondService {
 
     List<BondDto> getBonds(Integer page, Integer count);
 
-    List<BondDto> getBondsBySector(String sectorName);
+    List<BondDto> getBondsBySector(String sectorName, Integer count);
 
     OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto);
 }
