@@ -16,6 +16,7 @@
 		<module>invest-service</module>
 		<module>crud-microservice</module>
 		<module>tg-bot</module>
+		<module>eureka-server</module>
 	</modules>
 
     <properties>

@@ -24,6 +24,8 @@ services:
     image: crud-microservice
     ports:
       - "9097:9097"
+    links:
+      - eureka-service
     networks:
       - investflow_network
     environment:
@@ -31,6 +33,7 @@ services:
       - DATABASE_URL=jdbc:postgresql://db:5432/investdb
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
+      - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - db
 
@@ -41,12 +44,15 @@ services:
     image: auth-microservice
     ports:
       - "9099:9099"
+    links:
+      - eureka-service
     networks:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
       - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
       - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
+      - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - crud-microservice
 
@@ -57,6 +63,8 @@ services:
     image: invest-service
     ports:
       - "9098:9098"
+    links:
+      - eureka-service
     networks:
       - investflow_network
     environment:
@@ -65,6 +73,7 @@ services:
       - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
       - CREATE_ACCOUNT_LINK=http://crud-microservice:9097/api/v1/crud/users/accounts
       - ACCOUNT_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/accounts
+      - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - crud-microservice
       - auth-microservice
@@ -82,6 +91,7 @@ services:
       - JAVA_OPTS=-Xmx512M
       - REGISTER_USER_LINK=http://auth-microservice:9099/api/v1/auth/register
       - LOGIN_USER_LINK=http://auth-microservice:9099/api/v1/auth/login
+      - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - invest-service
 
@@ -106,13 +116,13 @@ services:
     build:
       context: ./
       dockerfile: eureka-server/Dockerfile
-    container_name: eureka-service
-    environment:
-      - EUREKA_URL=${EUREKA_URL}
+    image: eureka-service
     restart:
       always
     ports:
       - "9101:9101"
+    environment:
+      - EUREKA_URL=http://eureka-service:9101/eureka
     networks:
       - investflow_network
 
