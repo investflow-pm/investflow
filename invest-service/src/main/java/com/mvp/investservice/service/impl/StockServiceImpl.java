@@ -31,7 +31,7 @@ public class StockServiceImpl implements StockService {
     public StockDto getStockByName(String name) {
 
         List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync();
+                .getTradableSharesSync();
 
         Share share = shares.stream()
                 .filter(e -> e.getName().contains(name))
@@ -44,7 +44,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<StockDto> getStocks() {
         List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync().subList(0, 100);
+                .getTradableSharesSync().subList(0, 200);
 
         List<StockDto> stockDtos = new ArrayList<>();
         for (Share share : shares) {
@@ -57,7 +57,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<StockDto> getStocksBySector(String sectorName) {
         List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync().subList(0, 200);
+                .getTradableSharesSync().subList(0, 100);
 
         List<Share> sectorShares = shares.stream()
                 .filter(e -> e.getSector().equals(sectorName))
