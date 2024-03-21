@@ -1,6 +1,8 @@
 server:
   port: 9097
 spring:
+  application:
+    name: crud-microservice
   config:
     import: optional:file:.env[.properties]
   main:
@@ -18,3 +20,8 @@ spring:
       ddl-auto: create-drop
 #    properties:
 #      hibernate.default_schema: ${HIBERNATE_SCHEMA}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9101/eureka
