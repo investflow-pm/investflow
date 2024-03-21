@@ -101,7 +101,21 @@ services:
       - COMMAND_START_PICTURE=https://avatars.githubusercontent.com/u/160784827?s=200&v=4
     depends_on:
       - invest-service
-      
+
+  eureka-service:
+    build:
+      context: ./
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-service
+    environment:
+      - EUREKA_URL=${EUREKA_URL}
+    restart:
+      always
+    ports:
+      - "9101:9101"
+    networks:
+      - investflow_network
+
 networks:
   investflow_network:
     driver: bridge
