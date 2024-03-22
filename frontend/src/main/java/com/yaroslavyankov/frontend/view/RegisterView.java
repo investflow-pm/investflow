@@ -10,8 +10,10 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.yaroslavyankov.frontend.dto.user.RegisteredUser;
 import com.yaroslavyankov.frontend.dto.user.UserDto;
 import com.yaroslavyankov.frontend.props.AuthLinkProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -50,8 +52,8 @@ public class RegisterView extends VerticalLayout {
             }
             UserDto userDto = getUserDto(name, username, password);
             try {
-                UserDto response
-                        = restTemplate.postForObject(authLinkProperties.getRegisterLink(), userDto, UserDto.class);
+                RegisteredUser response
+                        = restTemplate.postForObject(authLinkProperties.getRegisterLink(), userDto, RegisteredUser.class);
                 if (response != null) {
                     UI.getCurrent().navigate("/login");
                 }

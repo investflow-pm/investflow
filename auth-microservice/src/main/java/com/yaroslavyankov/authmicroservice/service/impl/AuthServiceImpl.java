@@ -7,6 +7,7 @@ import com.yaroslavyankov.authmicroservice.service.props.LinkProperties;
 import com.yaroslavyankov.authmicroservice.web.dto.UserDto;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtRequest;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtResponse;
+import com.yaroslavyankov.authmicroservice.web.dto.auth.RegisteredUser;
 import com.yaroslavyankov.authmicroservice.web.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -61,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserDto register(UserDto userDto) {
+    public RegisteredUser register(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDto.setRoles(Set.of(Role.ROLE_USER));
         HttpEntity<UserDto> request = new HttpEntity<>(userDto);
@@ -71,7 +72,13 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException("Не удалось зарегистрироваться");
         }
 
-        return response.getBody();
+        UserDto user = response.getBody();
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(user.getUsername());
+        registeredUser.setId(user.getId());
+        registeredUser.setName(user.getName());
+
+        return registeredUser;
     }
 
     @Override

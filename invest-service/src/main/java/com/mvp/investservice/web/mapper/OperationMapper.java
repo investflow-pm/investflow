@@ -1,9 +1,8 @@
 package com.mvp.investservice.web.mapper;
 
 import com.mvp.investservice.util.MoneyParser;
-import com.mvp.investservice.web.dto.OperationResponse;
+import com.mvp.investservice.web.dto.Operation;
 import org.springframework.stereotype.Component;
-import ru.tinkoff.piapi.contract.v1.Operation;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -14,8 +13,8 @@ import java.time.ZoneId;
 public class OperationMapper {
 
 
-    public OperationResponse toDto(Operation operation, String assetName, int lot) {
-        OperationResponse operationResponse = new OperationResponse();
+    public Operation toDto(ru.tinkoff.piapi.contract.v1.Operation operation, String assetName, int lot) {
+        Operation operationResponse = new Operation();
 
         operationResponse.setOperationId(operation.getId());
         operationResponse.setOperationDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(operation.getDate().getSeconds(), operation.getDate().getNanos()), ZoneId.systemDefault()));

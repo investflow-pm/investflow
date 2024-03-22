@@ -2,33 +2,11 @@ package com.mvp.investservice.web.dto;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class OperationResponse {
 
-    private String operationId;
+    private List<Operation> operations;
 
-    private String instrumentType;
-
-    private String assetName;
-
-    private String figi;
-
-    private String currency;
-
-    private String operationType;
-
-    private String operationState;
-
-    private int quantity;
-
-    private BigDecimal payment;
-
-    private BigDecimal instrumentPrice;
-
-    private BigDecimal lotPrice;
-
-    private LocalDateTime operationDate;
 }
