@@ -37,7 +37,6 @@ public class StockServiceImpl implements StockService {
             throw new ResourceNotFoundException("Не удалось найти акцию: " + name);
         }
 
-<<<<<<< HEAD
         var tradableStocks = cacheService.getTradableStocksSync(investApi);
         List<String> stocksFigis = new ArrayList<>(stocksInfo.size());
         for (var stock : stocksInfo) {
@@ -45,10 +44,6 @@ public class StockServiceImpl implements StockService {
                 stocksFigis.add(stock.getFigi());
             }
         }
-=======
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync();
->>>>>>> 933555e6caa582353e1a48013aa5841435de7f24
 
         List<Share> stocks = new ArrayList<>();
         for (var figi : stocksFigis) {
@@ -59,22 +54,12 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-<<<<<<< HEAD
     public List<StockDto> getStocks(Integer page, Integer count) {
         if (page < 1) {
             page = 1;
         }
         if (count < 1) {
             count = 10;
-=======
-    public List<StockDto> getStocks() {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync().subList(0, 200);
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : shares) {
-            stockDtos.add(stockMapper.toDto(share));
->>>>>>> 933555e6caa582353e1a48013aa5841435de7f24
         }
 
         var tradableStocks = cacheService.getTradableStocksSync(investApi).subList((page - 1) * count, count - 1);
@@ -88,23 +73,9 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-<<<<<<< HEAD
     public List<StockDto> getStocksBySector(String sectorName, Integer count) {
         if (count <= 0) {
             count = 10;
-=======
-    public List<StockDto> getStocksBySector(String sectorName) {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync().subList(0, 100);
-
-        List<Share> sectorShares = shares.stream()
-                .filter(e -> e.getSector().equals(sectorName))
-                .toList();
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : sectorShares) {
-            stockDtos.add(stockMapper.toDto(share));
->>>>>>> 933555e6caa582353e1a48013aa5841435de7f24
         }
 
         var sector = SectorStockUtil.valueOfRussianName(sectorName);
