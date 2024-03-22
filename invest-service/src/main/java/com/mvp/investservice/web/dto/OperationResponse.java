@@ -7,6 +7,4 @@ import java.util.List;
 @Data
 public class OperationResponse {
     private List<Operation> operations;
-
-    private List<Operation> operations;
 }
