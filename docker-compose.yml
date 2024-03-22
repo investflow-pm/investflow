@@ -24,8 +24,6 @@ services:
     image: crud-microservice
     ports:
       - "9097:9097"
-    links:
-      - eureka-service
     networks:
       - investflow_network
     environment:
@@ -44,8 +42,6 @@ services:
     image: auth-microservice
     ports:
       - "9099:9099"
-    links:
-      - eureka-service
     networks:
       - investflow_network
     environment:
@@ -63,8 +59,6 @@ services:
     image: invest-service
     ports:
       - "9098:9098"
-    links:
-      - eureka-service
     networks:
       - investflow_network
     environment:
