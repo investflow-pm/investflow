@@ -1,6 +1,5 @@
 package com.mvp.crudmicroservice.user.service.impl;
 
-import com.mvp.crudmicroservice.user.domain.exception.AccountAlreadyExistsException;
 import com.mvp.crudmicroservice.user.domain.exception.ResourceNotFoundException;
 import com.mvp.crudmicroservice.user.domain.user.Account;
 import com.mvp.crudmicroservice.user.domain.user.User;
@@ -45,5 +44,16 @@ public class AccountServiceImpl implements AccountService {
     public Account getById(String accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    }
+
+    @Override
+    public Account getByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("There is no user with id " + userId));
+        Account account = new Account();
+        account.setInvestAccountId("a7c911bb-5b01-41bf-9db7-3767ac46385d");
+        account.setUser(user);
+
+        return account;
     }
 }

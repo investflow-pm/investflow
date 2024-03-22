@@ -13,6 +13,6 @@ FROM openjdk:17-slim
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.war app.war
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.war"]

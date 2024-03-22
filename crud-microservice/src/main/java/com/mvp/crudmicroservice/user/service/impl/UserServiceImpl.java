@@ -18,7 +18,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
     public User create(final User newUser) {
         Optional<User> existUser = userRepository.findByUsername(newUser.getUsername());
         if (existUser.isEmpty()) {
@@ -29,21 +28,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public User getById(final Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("There is no user with id %d", id)));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public User getByUsername(final String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователя с именем %s не существует", username)));
     }
 
     @Override
-    @Transactional
     public User update(final User user) {
         userRepository.save(user);
         return user;

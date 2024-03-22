@@ -4,7 +4,7 @@ package com.mvp.investservice.web.controller;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +18,21 @@ public class StockController {
 
     private final StockService stockService;
 
-    @GetMapping("/{stockName}")
-    public StockDto getStockByName(@PathVariable String stockName) {
-        return stockService.getStockByName(stockName);
+    @GetMapping
+    public List<StockDto> getStocksByName(@RequestParam(value = "name") String stockName) {
+        return stockService.getStocksByName(stockName);
     }
 
-    @GetMapping()
-    public List<StockDto> getAllStocks() {
-        return stockService.getStocks();
+    @GetMapping("/all")
+    public List<StockDto> getAllStocks(@RequestParam(value = "page") Integer page,
+                                        @RequestParam(value = "count") Integer count) {
+        return stockService.getStocks(page, count);
     }
 
     @GetMapping("/sector/{sectorName}")
-    public List<StockDto> getStocksBySector(@PathVariable String sectorName) {
-        return stockService.getStocksBySector(sectorName);
+    public List<StockDto> getStocksBySector(@PathVariable String sectorName,
+                                            @RequestParam(value = "count") Integer count) {
+        return stockService.getStocksBySector(sectorName, count);
     }
 
     @PostMapping("/buy")

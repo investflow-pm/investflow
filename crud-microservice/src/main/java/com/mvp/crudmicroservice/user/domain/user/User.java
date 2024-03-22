@@ -1,6 +1,5 @@
 package com.mvp.crudmicroservice.user.domain.user;
 
-import com.mvp.crudmicroservice.portfolio.domain.UserStockPortfolio;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -28,9 +27,6 @@ public class User implements Serializable {
     @CollectionTable(name = "users_roles")
     @Enumerated(value = EnumType.STRING)
     private Set<Role> roles;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserStockPortfolio> stockPortfolio;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

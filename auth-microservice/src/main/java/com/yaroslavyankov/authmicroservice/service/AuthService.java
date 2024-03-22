@@ -3,6 +3,7 @@ package com.yaroslavyankov.authmicroservice.service;
 import com.yaroslavyankov.authmicroservice.web.dto.UserDto;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtRequest;
 import com.yaroslavyankov.authmicroservice.web.dto.auth.JwtResponse;
+import com.yaroslavyankov.authmicroservice.web.dto.auth.RegisteredUser;
 
 public interface AuthService {
 
@@ -10,5 +11,5 @@ public interface AuthService {
 
     JwtResponse refresh(String refreshToken);
 
-    UserDto register(UserDto userDto);
+    RegisteredUser register(UserDto userDto);
 }

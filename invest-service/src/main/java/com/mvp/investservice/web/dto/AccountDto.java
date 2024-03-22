@@ -1,8 +1,7 @@
 package com.mvp.investservice.web.dto;
 
+import com.mvp.investservice.web.dto.user.UserDto;
 import lombok.Data;
-
-import java.math.BigDecimal;
 
 /**
  * дтошка для создания аккаунта в инвестициях

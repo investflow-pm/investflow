@@ -1,16 +1,14 @@
 server:
   port: 9098
 
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
 secret:
-  token: t.VqnElEfrPsAXQfuhO8JgcnOUhpz9dI3dNq6yFntZaSuRtU7eKgBNusIpTIifs14jsPfI5hRl47JXsByKqWGMFg
+  token: ${TOKEN}
 
 rest:
-  userServiceLink: http://localhost:9097/api/v1/crud/users
-  createAccountLink: http://localhost:9097/api/v1/crud/users/accounts
-  accountServiceLink:  http://localhost:9097/api/v1/crud/accounts
-
-spring:
-  datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/
-    username: postgres
-    password: postgres
+  userServiceLink: ${USER_SERVICE_LINK}
+  createAccountLink: ${CREATE_ACCOUNT_LINK}
+  accountServiceLink: ${ACCOUNT_SERVICE_LINK}

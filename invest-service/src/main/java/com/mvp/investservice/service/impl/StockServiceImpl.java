@@ -1,11 +1,15 @@
 package com.mvp.investservice.service.impl;
 
+import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
+import com.mvp.investservice.service.cache.CacheService;
+import com.mvp.investservice.util.MoneyParser;
+import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
-import com.mvp.investservice.web.dto.StockDto;
+import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,76 +25,90 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StockServiceImpl implements StockService {
 
+    private final CacheService cacheService;
     private final InvestApi investApi;
-
     private final StockMapper stockMapper;
 
     @Override
-    public StockDto getStockByName(String name) {
+    public List<StockDto>  getStocksByName(String name) {
+        var stocksInfo = investApi.getInstrumentsService().findInstrumentSync(name)
+                .stream().filter(b -> b.getInstrumentType().equalsIgnoreCase("share")).toList();
+        if (stocksInfo.isEmpty()) {
+            throw new ResourceNotFoundException("Не удалось найти акцию: " + name);
+        }
 
-        List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync();
+        var tradableStocks = cacheService.getTradableStocksSync(investApi);
+        List<String> stocksFigis = new ArrayList<>(stocksInfo.size());
+        for (var stock : stocksInfo) {
+            if (!tradableStocks.stream().filter(b -> b.getFigi().equalsIgnoreCase(stock.getFigi())).findFirst().isEmpty()) {
+                stocksFigis.add(stock.getFigi());
+            }
+        }
 
-        Share share = shares.stream()
-                .filter(e -> e.getName().contains(name))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("There is no Share with name " + name));
+        List<Share> stocks = new ArrayList<>();
+        for (var figi : stocksFigis) {
+            stocks.add(investApi.getInstrumentsService().getShareByFigiSync(figi));
+        }
 
-        return stockMapper.toDto(share);
+        return stockMapper.toDto(stocks);
     }
 
     @Override
-    public List<StockDto> getStocks() {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync().subList(0, 100);
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : shares) {
-            stockDtos.add(stockMapper.toDto(share));
+    public List<StockDto> getStocks(Integer page, Integer count) {
+        if (page < 1) {
+            page = 1;
+        }
+        if (count < 1) {
+            count = 10;
         }
 
-        return stockDtos;
+        var tradableStocks = cacheService.getTradableStocksSync(investApi).subList((page - 1) * count, count - 1);
+
+        List<StockDto> stocks = new ArrayList<>();
+        for (var stock : tradableStocks) {
+            stocks.add(stockMapper.toDto(stock));
+        }
+
+        return stocks;
     }
 
     @Override
-    public List<StockDto> getStocksBySector(String sectorName) {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getAllSharesSync();
-
-        List<Share> sectorShares = shares.stream()
-                .filter(e -> e.getSector().equals(sectorName))
-                .toList();
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : sectorShares) {
-            stockDtos.add(stockMapper.toDto(share));
+    public List<StockDto> getStocksBySector(String sectorName, Integer count) {
+        if (count <= 0) {
+            count = 10;
         }
 
-        return stockDtos;
-    }
+        var sector = SectorStockUtil.valueOfRussianName(sectorName);
+        var tradableStocks = cacheService.getTradableStocksSync(investApi);
 
-    // TODO
-    //  1) Проверить проверку работы покупки акций,
-    //  где лот из нескольких лотов (BBG000LNHHJ9)
-    //  2) Написать ControllerAdvice для обработки ошибок
+        List<Share> stocksBySector = new ArrayList<>();
+
+        for (var i = 0; i < tradableStocks.size() && stocksBySector.size() <= count; i++) {
+            var stock = tradableStocks.get(i);
+            if (stock.getSector().equalsIgnoreCase(sector)) {
+                stocksBySector.add(stock);
+            }
+        }
+
+        List<StockDto> stocks = new ArrayList<>();
+        for (var stock : stocksBySector) {
+            stocks.add(stockMapper.toDto(stock));
+        }
+
+        return stocks;
+    }
 
     @Override
     public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
+        Share shareToBuy;
+        try {
+            shareToBuy = investApi.getInstrumentsService()
+                    .getShareByFigiSync(purchaseDto.getFigi());
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
 
-        // !!! Временно использовать в целях посмотреть, какими акциями можно торговать)
-        /*
-        List<Share> allSharesSync = investApi.getInstrumentsService()
-                .getAllSharesSync();
-
-        List<Share> shares
-                = allSharesSync.stream()
-                .filter(share -> share.getApiTradeAvailableFlag() && share.getCurrency().equals("rub")).toList();
-        */
-
-        Share shareToBuy = investApi.getInstrumentsService()
-                .getShareByFigiSync(purchaseDto.getFigi());
-
-        if (shareToBuy.getBuyAvailableFlag()) {
+        if (shareToBuy.getBuyAvailableFlag() && shareToBuy.getApiTradeAvailableFlag()) {
             String figi = shareToBuy.getFigi();
             BigDecimal price = getBigDecimalPrice(figi);
             Quotation resultPrice = getPurchasePrice(price);
@@ -99,28 +117,36 @@ public class StockServiceImpl implements StockService {
                 postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
             } catch (Exception e) {
-                throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
+                throw new BuyUnavailableException(e.getMessage());
             }
 
-            return generateOrderResponse(shareToBuy, price, postOrderResponse);
+            return generateOrderResponse(shareToBuy, postOrderResponse);
         } else {
-            throw new BuyUnavailableException("You can not buy the share now");
+            throw new BuyUnavailableException("В данный момент невозможно купить данную акцию");
         }
     }
 
     /**
      * Метод по генерации ответа по покупке акции
      * @param shareToBuy - акция, которая будет куплена пользователем
-     * @param price - цена покупки
      * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
      * @return
      */
-    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, BigDecimal price, PostOrderResponse postOrderResponse) {
+    private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
         StockDto stockDto = stockMapper.toDto(shareToBuy);
-        stockDto.setLots((int) postOrderResponse.getLotsExecuted());
+
+        return setOrderResponseFields(postOrderResponse, stockDto);
+    }
+
+    private OrderResponse<StockDto> setOrderResponseFields(PostOrderResponse postOrderResponse, StockDto stockDto) {
         OrderResponse<StockDto> orderResponse = new OrderResponse<>();
         orderResponse.setOrderId(postOrderResponse.getOrderId());
-        orderResponse.setPrice(price.toString());
+        orderResponse.setExecutionStatus(postOrderResponse.getExecutionReportStatus().name());
+        orderResponse.setLotRequested((int) postOrderResponse.getLotsRequested());
+        orderResponse.setLotExecuted((int) postOrderResponse.getLotsExecuted());
+        orderResponse.setInitialOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getInitialOrderPrice()));
+        orderResponse.setExecutedOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getExecutedOrderPrice()));
+        orderResponse.setTotalOrderPrice(MoneyParser.moneyValueToBigDecimal(postOrderResponse.getTotalOrderAmount()));
         orderResponse.setAsset(stockDto);
         return orderResponse;
     }
@@ -162,8 +188,6 @@ public class StockServiceImpl implements StockService {
         BigDecimal minPrice
                 = minPriceIncrement.getUnits() == 0 && minPriceIncrement.getNano() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(minPriceIncrement.getUnits()).add(BigDecimal.valueOf(minPriceIncrement.getNano(), 9));
 
-        BigDecimal price
-                = lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
-        return price;
+        return lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
     }
 }

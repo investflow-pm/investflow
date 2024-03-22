@@ -43,8 +43,10 @@ public class OperationServiceImpl implements OperationService {
             int lot = asset.getLot();
             operations.add(operationMapper.toDto(operation, assetName, lot));
         }
+
         OperationResponse operationResponse = new OperationResponse();
         operationResponse.setOperations(operations);
+      
         return operationResponse;
     }
 }

@@ -2,6 +2,8 @@ package com.mvp.investservice.web.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * Дтошка, возвращающая баланс аккаунта
  * и сумму пополнения
@@ -10,7 +12,7 @@ import lombok.Data;
 @Data
 public class BalanceDto {
 
-    private String balance;
+    private BigDecimal balance;
 
-    private String addedMoney;
+    private BigDecimal addedMoney;
 }

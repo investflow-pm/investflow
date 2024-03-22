@@ -1,13 +1,38 @@
 version: '3'
+volumes:
+  postgres_data:
+
 services:
   db:
-    image: postgres:14.1-alpine
+    image: postgres:16.2
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=investdb
     ports:
       - '5432:5432'
+    networks:
+      - investflow_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  crud-microservice:
+    build:
+      context: ./
+      dockerfile: crud-microservice/Dockerfile
+    image: crud-microservice
+    ports:
+      - "9097:9097"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+      - DATABASE_URL=jdbc:postgresql://db:5432/investdb
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+    depends_on:
+      - db
 
   auth-microservice:
     build:
@@ -21,23 +46,9 @@ services:
     environment:
       - JAVA_OPTS=-Xmx512M
       - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
+      - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
     depends_on:
-      - db
-
-  crud-microservice:
-    build:
-      context: ./
-      dockerfile: crud-microservice/Dockerfile
-    image: crud-microservice
-    ports:
-      - "9097:9097"
-    networks:
-      - investflow_network
-    environment:
-      - JAVA_OPTS=-Xmx512M
-    depends_on:
-      - db
-#
+      - crud-microservice
 
   invest-service:
     build:
@@ -50,8 +61,13 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
+      - TOKEN=t.VqnElEfrPsAXQfuhO8JgcnOUhpz9dI3dNq6yFntZaSuRtU7eKgBNusIpTIifs14jsPfI5hRl47JXsByKqWGMFg
+      - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
+      - CREATE_ACCOUNT_LINK=http://crud-microservice:9097/api/v1/crud/users/accounts
+      - ACCOUNT_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/accounts
     depends_on:
-      - db
+      - crud-microservice
+      - auth-microservice
       
   frontend:
     build:
@@ -59,13 +75,15 @@ services:
       dockerfile: frontend/Dockerfile
     image: frontend
     ports:
-      - "9095:9095"
+      - "9100:9100"
     networks:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
+      - REGISTER_USER_LINK=http://auth-microservice:9099/api/v1/auth/register
+      - LOGIN_USER_LINK=http://auth-microservice:9099/api/v1/auth/login
     depends_on:
-      - db
+      - invest-service
 
   tg-bot:
     build:
@@ -78,8 +96,11 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
+      - BOT_NAME=T-Investments_bot
+      - BOT_TOKEN=6704956257:AAHi8I6zB14jvUnAqkEWFtcNNTL51_BEuME
+      - COMMAND_START_PICTURE=https://avatars.githubusercontent.com/u/160784827?s=200&v=4
     depends_on:
-      - db
+      - invest-service
       
 networks:
   investflow_network:

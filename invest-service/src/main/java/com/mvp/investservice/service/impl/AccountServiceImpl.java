@@ -3,10 +3,11 @@ package com.mvp.investservice.service.impl;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.AccountService;
 import com.mvp.investservice.service.props.LinkProperties;
+import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.web.dto.AccountDto;
 import com.mvp.investservice.web.dto.BalanceDto;
 import com.mvp.investservice.web.dto.PayInDto;
-import com.mvp.investservice.web.dto.UserDto;
+import com.mvp.investservice.web.dto.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -59,11 +60,11 @@ public class AccountServiceImpl implements AccountService {
         MoneyValue balance
                 = investApi.getSandboxService().payInSync(payInDto.getAccountId(), moneyValue);
         BigDecimal newBalance
-                = balance.getUnits() == 0 && balance.getNano() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(balance.getUnits()).add(BigDecimal.valueOf(balance.getNano(), 9));
+                = MoneyParser.moneyValueToBigDecimal(balance);
 
         BalanceDto balanceDto = new BalanceDto();
-        balanceDto.setAddedMoney(payInDto.getMoneyToPay().toString());
-        balanceDto.setBalance(newBalance.toString());
+        balanceDto.setAddedMoney(payInDto.getMoneyToPay());
+        balanceDto.setBalance(newBalance);
         return balanceDto;
     }
 
