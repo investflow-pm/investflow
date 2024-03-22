@@ -4,6 +4,7 @@ import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.BondService;
+import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.util.SectorBondUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
@@ -11,7 +12,6 @@ import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.mapper.BondMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
@@ -25,6 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BondServiceImpl implements BondService {
 
+    private final CacheService cacheService;
     private final InvestApi investApi;
     private final BondMapper bondMapper;
 
@@ -36,7 +37,7 @@ public class BondServiceImpl implements BondService {
             throw new ResourceNotFoundException("Не удалось найти облигацию: " + name);
         }
 
-        var tradableBonds = investApi.getInstrumentsService().getTradableBondsSync(); // TODO: cash
+        var tradableBonds = cacheService.getTradableBondsSync(investApi);
         List<String> bondFigis = new ArrayList<>(bondsInfo.size());
         for (var bond : bondsInfo) {
             if (!tradableBonds.stream().filter(b -> b.getFigi().equalsIgnoreCase(bond.getFigi())).findFirst().isEmpty()) {
@@ -54,8 +55,14 @@ public class BondServiceImpl implements BondService {
 
     @Override
     public List<BondDto> getBonds(Integer page, Integer count) {
-        var tradableBonds = investApi.getInstrumentsService()
-                .getTradableBondsSync().subList((page - 1) * count, count - 1); // TODO: cash
+        if (page < 1) {
+            page = 1;
+        }
+        if (count < 1) {
+            count = 10;
+        }
+
+        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count - 1);
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
@@ -72,7 +79,7 @@ public class BondServiceImpl implements BondService {
         }
 
         var sector = SectorBondUtil.valueOfRussianName(sectorName);
-        var tradableBonds = investApi.getInstrumentsService().getTradableBondsSync();
+        var tradableBonds = cacheService.getTradableBondsSync(investApi);
 
         List<Bond> bondsBySector = new ArrayList<>();
 
@@ -166,7 +173,7 @@ public class BondServiceImpl implements BondService {
      * в виде BigDecimal
      *
      * @param figi
-     * @return
+     * @return lastPrice
      */
     private BigDecimal getBigDecimalPrice(String figi) {
         Quotation shareLastPrice = investApi.getMarketDataService()
@@ -181,8 +188,6 @@ public class BondServiceImpl implements BondService {
         BigDecimal minPrice
                 = minPriceIncrement.getUnits() == 0 && minPriceIncrement.getNano() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(minPriceIncrement.getUnits()).add(BigDecimal.valueOf(minPriceIncrement.getNano(), 9));
 
-        BigDecimal price
-                = lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
-        return price;
+        return lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
     }
 }
