@@ -19,18 +19,20 @@ public class StockController {
     private final StockService stockService;
 
     @GetMapping
-    public StockDto getStockByName(@RequestParam(value = "name") String stockName) {
-        return stockService.getStockByName(stockName);
+    public List<StockDto> getStocksByName(@RequestParam(value = "name") String stockName) {
+        return stockService.getStocksByName(stockName);
     }
 
     @GetMapping("/all")
-    public List<StockDto> getAllStocks() {
-        return stockService.getStocks();
+    public List<StockDto> getAllStocks(@RequestParam(value = "page") Integer page,
+                                        @RequestParam(value = "count") Integer count) {
+        return stockService.getStocks(page, count);
     }
 
     @GetMapping("/sector/{sectorName}")
-    public List<StockDto> getStocksBySector(@PathVariable String sectorName) {
-        return stockService.getStocksBySector(sectorName);
+    public List<StockDto> getStocksBySector(@PathVariable String sectorName,
+                                            @RequestParam(value = "count") Integer count) {
+        return stockService.getStocksBySector(sectorName, count);
     }
 
     @PostMapping("/buy")

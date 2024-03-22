@@ -18,6 +18,7 @@
 		<module>tg-bot</module>
 		<module>eureka-server</module>
 		<module>api-gateway</module>
+		<module>report-service</module>
 	</modules>
 
     <properties>

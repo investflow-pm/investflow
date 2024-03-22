@@ -4,7 +4,9 @@ import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
+import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
+import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
@@ -23,52 +25,77 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StockServiceImpl implements StockService {
 
+    private final CacheService cacheService;
     private final InvestApi investApi;
-
     private final StockMapper stockMapper;
 
     @Override
-    public StockDto getStockByName(String name) {
+    public List<StockDto>  getStocksByName(String name) {
+        var stocksInfo = investApi.getInstrumentsService().findInstrumentSync(name)
+                .stream().filter(b -> b.getInstrumentType().equalsIgnoreCase("share")).toList();
+        if (stocksInfo.isEmpty()) {
+            throw new ResourceNotFoundException("Не удалось найти акцию: " + name);
+        }
 
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync();
+        var tradableStocks = cacheService.getTradableStocksSync(investApi);
+        List<String> stocksFigis = new ArrayList<>(stocksInfo.size());
+        for (var stock : stocksInfo) {
+            if (!tradableStocks.stream().filter(b -> b.getFigi().equalsIgnoreCase(stock.getFigi())).findFirst().isEmpty()) {
+                stocksFigis.add(stock.getFigi());
+            }
+        }
 
-        Share share = shares.stream()
-                .filter(e -> e.getName().contains(name))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Не удалось найти акцию " + name));
+        List<Share> stocks = new ArrayList<>();
+        for (var figi : stocksFigis) {
+            stocks.add(investApi.getInstrumentsService().getShareByFigiSync(figi));
+        }
 
-        return stockMapper.toDto(share);
+        return stockMapper.toDto(stocks);
     }
 
     @Override
-    public List<StockDto> getStocks() {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync().subList(0, 200);
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : shares) {
-            stockDtos.add(stockMapper.toDto(share));
+    public List<StockDto> getStocks(Integer page, Integer count) {
+        if (page < 1) {
+            page = 1;
+        }
+        if (count < 1) {
+            count = 10;
         }
 
-        return stockDtos;
+        var tradableStocks = cacheService.getTradableStocksSync(investApi).subList((page - 1) * count, count - 1);
+
+        List<StockDto> stocks = new ArrayList<>();
+        for (var stock : tradableStocks) {
+            stocks.add(stockMapper.toDto(stock));
+        }
+
+        return stocks;
     }
 
     @Override
-    public List<StockDto> getStocksBySector(String sectorName) {
-        List<Share> shares = investApi.getInstrumentsService()
-                .getTradableSharesSync().subList(0, 100);
-
-        List<Share> sectorShares = shares.stream()
-                .filter(e -> e.getSector().equals(sectorName))
-                .toList();
-
-        List<StockDto> stockDtos = new ArrayList<>();
-        for (Share share : sectorShares) {
-            stockDtos.add(stockMapper.toDto(share));
+    public List<StockDto> getStocksBySector(String sectorName, Integer count) {
+        if (count <= 0) {
+            count = 10;
         }
 
-        return stockDtos;
+        var sector = SectorStockUtil.valueOfRussianName(sectorName);
+        var tradableStocks = cacheService.getTradableStocksSync(investApi);
+
+        List<Share> stocksBySector = new ArrayList<>();
+
+        for (var i = 0; i < tradableStocks.size() && stocksBySector.size() <= count; i++) {
+            var stock = tradableStocks.get(i);
+            if (stock.getSector().equalsIgnoreCase(sector)) {
+                stocksBySector.add(stock);
+            }
+        }
+
+        List<StockDto> stocks = new ArrayList<>();
+        for (var stock : stocksBySector) {
+            stocks.add(stockMapper.toDto(stock));
+        }
+
+        return stocks;
     }
 
     @Override
@@ -161,8 +188,6 @@ public class StockServiceImpl implements StockService {
         BigDecimal minPrice
                 = minPriceIncrement.getUnits() == 0 && minPriceIncrement.getNano() == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(minPriceIncrement.getUnits()).add(BigDecimal.valueOf(minPriceIncrement.getNano(), 9));
 
-        BigDecimal price
-                = lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
-        return price;
+        return lastPrice.subtract(minPrice.multiply(BigDecimal.TEN.multiply(BigDecimal.TEN)));
     }
 }

@@ -28,14 +28,15 @@ public class BondController {
                                        @RequestParam(value = "count") Integer count) {
         return bondService.getBonds(page, count);
     }
-//
-//    @GetMapping("/sector/{sectorName}")
-//    public List<StockDto> getStocksBySector(@PathVariable String sectorName) {
-//        return bondService.getStocksBySector(sectorName);
-//    }
-//
-//    @PostMapping("/buy")
-//    public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
-//        return bondService.buyStock(purchaseDto);
-//    }
+
+    @GetMapping("/sector/{sectorName}")
+    public List<BondDto> getBondsBySector(@PathVariable String sectorName,
+                                            @RequestParam(value = "count") Integer count) {
+        return bondService.getBondsBySector(sectorName, count);
+    }
+
+    @PostMapping("/buy")
+    public OrderResponse<BondDto> buyBond(@RequestBody PurchaseDto purchaseDto) {
+        return bondService.buyBond(purchaseDto);
+    }
 }

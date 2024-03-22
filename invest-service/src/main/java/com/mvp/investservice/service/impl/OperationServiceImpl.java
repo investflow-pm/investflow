@@ -46,7 +46,7 @@ public class OperationServiceImpl implements OperationService {
 
         OperationResponse operationResponse = new OperationResponse();
         operationResponse.setOperations(operations);
-
+      
         return operationResponse;
     }
 }

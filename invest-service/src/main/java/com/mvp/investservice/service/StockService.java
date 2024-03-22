@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface StockService {
 
-    StockDto getStockByName(String name);
+    List<StockDto> getStocksByName(String name);
 
-    List<StockDto> getStocks();
+    List<StockDto> getStocks(Integer page, Integer count);
 
-    List<StockDto> getStocksBySector(String sectorName);
+    List<StockDto> getStocksBySector(String sectorName, Integer count);
 
     OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto);
 }
