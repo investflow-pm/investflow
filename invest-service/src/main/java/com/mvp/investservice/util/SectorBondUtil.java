@@ -41,4 +41,14 @@ public enum SectorBondUtil {
 
         return null;
     }
+
+    public static String valueOfEnglishName(String englishName) {
+        for (var name : values()) {
+            if (name.englishName.equalsIgnoreCase(englishName)) {
+                return name.russianName;
+            }
+        }
+
+        return null;
+    }
 }
