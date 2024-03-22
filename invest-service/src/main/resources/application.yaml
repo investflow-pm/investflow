@@ -2,6 +2,8 @@ server:
   port: 9098
 
 spring:
+  application:
+    name: invest-microservice
   config:
     import: optional:file:.env[.properties]
 
@@ -12,3 +14,8 @@ rest:
   userServiceLink: ${USER_SERVICE_LINK}
   createAccountLink: ${CREATE_ACCOUNT_LINK}
   accountServiceLink: ${ACCOUNT_SERVICE_LINK}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}

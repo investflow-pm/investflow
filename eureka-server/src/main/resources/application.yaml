@@ -1,17 +1,16 @@
 server:
-  port: 9100
+  port: 9101
 
 spring:
   application:
-    name: frontend
+    name: eureka-server
   config:
     import: optional:file:.env[.properties]
 
-auth:
-  loginLink: ${LOGIN_USER_LINK}
-  registerLink: ${REGISTER_USER_LINK}
-
 eureka:
   client:
+    register-with-eureka: false
+    fetch-registry: false
     service-url:
       defaultZone: ${EUREKA_URL}
+
