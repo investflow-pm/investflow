@@ -18,6 +18,6 @@ public class Account {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "telegram_id", nullable = false)
+    @JoinColumn(name = "telegram_id")
     private Telegram telegram;
 }
