@@ -1,4 +1,4 @@
-package com.mvp.investservice.web.dto;
+package com.example.reportservice.model;
 
 import lombok.Data;
 

@@ -1,17 +1,17 @@
-package org.example.reports;
+package com.example.reportservice.tinkoff.reports;
 
-import ru.tinkoff.piapi.core.InvestApi;
+import ru.tinkoff.piapi.core.models.Positions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class StocksReport extends Report{
-    public StocksReport(ArrayList<String> positions, InvestApi api) throws IOException {
+public class StockReport extends Report{
+    public StockReport(ArrayList<String> positions) throws IOException {
         super();
         this.setSheetname("Stocks")
                 .setFilename("report.xls")
                 .setHeaders(new String[]{"figi", "наименование", "тикер", "валюта", "лот", "шаг цены"})
-                .setDataFigi(positions, api);
+                .setDataFigi(positions);
         Report.createSheet();
     }
 }
