@@ -4,6 +4,7 @@ import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class BondController {
     @PostMapping("/buy")
     public OrderResponse<BondDto> buyBond(@RequestBody PurchaseDto purchaseDto) {
         return bondService.buyBond(purchaseDto);
+    }
+
+    @PostMapping("/sale")
+    public OrderResponse<BondDto> saleBond(@RequestBody SaleDto saleDto) {
+        return bondService.saleBond(saleDto);
     }
 }
