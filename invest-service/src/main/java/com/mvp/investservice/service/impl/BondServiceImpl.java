@@ -148,6 +148,7 @@ public class BondServiceImpl implements BondService {
                 if (asset.getAsset() instanceof BondDto) {
                     if (((BondDto)asset.getAsset()).getFigi().equalsIgnoreCase(saleDto.getFigi())) {
                         saleBond = (BondDto)asset.getAsset();
+                        break;
                     }
                 }
             }

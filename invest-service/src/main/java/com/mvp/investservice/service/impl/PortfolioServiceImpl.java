@@ -43,13 +43,6 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PositionResponse> getPortfolioPositions(PortfolioRequest portfolioRequest) {
-//        Portfolio portfolio = investApi.getOperationsService()
-//                .getPortfolioSync(portfolioRequest.getAccountId());
-//
-//        List<Position> positions = portfolio.getPositions();
-//
-//        return null;
-
         return this.getPortfolio(portfolioRequest).getPositions();
     }
 

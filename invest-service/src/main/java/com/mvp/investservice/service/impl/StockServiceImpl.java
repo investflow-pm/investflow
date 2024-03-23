@@ -9,6 +9,9 @@ import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
+import com.mvp.investservice.web.dto.bond.BondDto;
+import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class StockServiceImpl implements StockService {
     private final CacheService cacheService;
     private final InvestApi investApi;
     private final StockMapper stockMapper;
+    private final PortfolioServiceImpl portfolioService;
 
     @Override
     public List<StockDto>  getStocksByName(String name) {
@@ -111,7 +115,7 @@ public class StockServiceImpl implements StockService {
         if (shareToBuy.getBuyAvailableFlag() && shareToBuy.getApiTradeAvailableFlag()) {
             String figi = shareToBuy.getFigi();
             BigDecimal price = getBigDecimalPrice(figi);
-            Quotation resultPrice = getPurchasePrice(price);
+            Quotation resultPrice = getPrice(price);
             PostOrderResponse postOrderResponse;
             try {
                 postOrderResponse = investApi.getOrdersService()
@@ -126,6 +130,47 @@ public class StockServiceImpl implements StockService {
         }
     }
 
+    @Override
+    public OrderResponse<StockDto> saleStock(SaleDto saleDto) {
+        StockDto saleStock = null;
+        try {
+            var portfolio = new PortfolioRequest();
+            portfolio.setAccountId(saleDto.getAccountId());
+
+            var positions = portfolioService.getPortfolioPositions(portfolio);
+            if (positions.isEmpty()) {
+                throw new AssetNotFoundException("В портфеле отсутсвуют ценные бумаги");
+            }
+
+            for (var asset : portfolioService.getPortfolioPositions(portfolio)) {
+                if (asset.getAsset() instanceof StockDto) {
+                    if (((StockDto)asset.getAsset()).getFigi().equalsIgnoreCase(saleDto.getFigi())) {
+                        saleStock = (StockDto)asset.getAsset();
+                        break;
+                    }
+                }
+            }
+
+            if (saleStock == null) {
+                throw new AssetNotFoundException("В портфеле отсутсвует выбранная акция");
+            }
+
+            var saleResponse = investApi.getOrdersService()
+                    .postOrderSync(saleStock.getFigi(),
+                            saleDto.getLot(),
+                            getPrice(getBigDecimalPrice(saleStock.getFigi())),
+                            OrderDirection.ORDER_DIRECTION_SELL,
+                            saleDto.getAccountId(),
+                            OrderType.valueOf(saleDto.getOrderType().name()),
+                            UUID.randomUUID().toString());
+
+            return generateOrderResponse(saleStock, saleResponse);
+
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
      * @param shareToBuy - акция, которая будет куплена пользователем
@@ -135,6 +180,10 @@ public class StockServiceImpl implements StockService {
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
         StockDto stockDto = stockMapper.toDto(shareToBuy);
 
+        return setOrderResponseFields(postOrderResponse, stockDto);
+    }
+
+    private OrderResponse<StockDto> generateOrderResponse(StockDto stockDto, PostOrderResponse postOrderResponse) {
         return setOrderResponseFields(postOrderResponse, stockDto);
     }
 
@@ -158,7 +207,7 @@ public class StockServiceImpl implements StockService {
      * @param price
      * @return Quotation (units - рубли, nanos - копейки)
      */
-    private Quotation getPurchasePrice(BigDecimal price) {
+    private Quotation getPrice(BigDecimal price) {
 
         return Quotation.newBuilder()
                 .setUnits(price != null ? price.longValue() : 0)

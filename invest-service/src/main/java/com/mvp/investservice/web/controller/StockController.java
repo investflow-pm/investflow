@@ -4,6 +4,8 @@ package com.mvp.investservice.web.controller;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
+import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -38,5 +40,10 @@ public class StockController {
     @PostMapping("/buy")
     public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
         return stockService.buyStock(purchaseDto);
+    }
+
+    @PostMapping("/sale")
+    public OrderResponse<StockDto> saleStock(@RequestBody SaleDto saleDto) {
+        return stockService.saleStock(saleDto);
     }
 }
