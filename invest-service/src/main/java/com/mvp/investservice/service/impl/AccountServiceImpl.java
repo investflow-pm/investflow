@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
         return MoneyParser.moneyValueToBigDecimal(balance);
     }
 
-    @Override
+    @Override // TODO: change
     public AccountDto getAccount() {
         Account account = investApi.getSandboxService().getAccountsSync().get(0);
         AccountDto accountDto = new AccountDto();

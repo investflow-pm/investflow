@@ -16,7 +16,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
-    @PostMapping("/{userId}")
+    @PutMapping("/{userId}")
     public AccountDto openAccount(@PathVariable Long userId) {
         return accountService.openAccount(userId);
     }
