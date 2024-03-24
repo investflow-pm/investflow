@@ -21,6 +21,7 @@ import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -186,7 +187,6 @@ public class StockServiceImpl implements StockService {
         }
     }
 
-// TODO
     @Override
     public List<DividendDto> getDividends(String figi) {
         if (investApi.getInstrumentsService().findInstrumentSync(figi)
@@ -200,24 +200,37 @@ public class StockServiceImpl implements StockService {
         var dividendsDescDate = new ArrayList<>(dividendsAscDate);
         Collections.reverse(dividendsDescDate);
 
-
-        return null;
+        return generateDividendsDto(dividendsDescDate);
     }
 
     private List<DividendDto> generateDividendsDto(List<Dividend> dividends) {
         var dividendsDto = new ArrayList<DividendDto>();
 
-//        for (var div : dividends) {
-//            var dividendDto = new DividendDto();
-//
-//            dividendDto.setDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(div.getPaymentDate().getSeconds()),
-//                    ZoneId.systemDefault()));
-//            dividendDto.setPaymentPerShare(new BigDecimal(div.getDividendNet().getUnits()).movePointRight());
-//            dividendDto.setCurrency(div.getDividendNet().getCurrency());
-//            dividendDto.setInterestIncome();
-//        }
+        for (var div : dividends) {
+            var dividendDto = new DividendDto();
+
+            dividendDto.setDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(div.getLastBuyDate().getSeconds()),
+                    ZoneId.systemDefault()));
+            dividendDto.setPaymentPerShare(convertToBigDecimal(div.getDividendNet()));
+            dividendDto.setCurrency(div.getDividendNet().getCurrency());
+            dividendDto.setInterestIncome(convertToBigDecimal(div.getYieldValue()));
+
+            dividendsDto.add(dividendDto);
+        }
 
         return dividendsDto;
+    }
+
+    // переводит units и nano из Quotation в значение BigDecimal
+    private static BigDecimal convertToBigDecimal(Quotation value) {
+        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
+        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
+    }
+
+    // переводит units и nano из MoneyValue в значение BigDecimal
+    private static BigDecimal convertToBigDecimal(MoneyValue value) {
+        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
+        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
     }
 
     /**
