@@ -1,6 +1,6 @@
 package com.example.reportservice.tinkoff.reports;
 
-import com.example.reportservice.model.OperationResponse;
+import com.example.reportservice.model.operation.OperationResponse;
 import com.example.reportservice.tinkoff.instruments.InfoInstruments;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;

@@ -1,4 +1,4 @@
-package com.example.reportservice.model;
+package com.example.reportservice.model.operation;
 
 import lombok.Data;
 
