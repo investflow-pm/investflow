@@ -16,7 +16,7 @@
 		<module>invest-service</module>
 		<module>crud-microservice</module>
 		<module>tg-bot</module>
-		<module>report-service</module>
+<!--		<module>report-service</module>-->
 	</modules>
 
     <properties>

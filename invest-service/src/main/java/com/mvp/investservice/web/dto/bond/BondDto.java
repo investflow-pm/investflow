@@ -1,6 +1,7 @@
 package com.mvp.investservice.web.dto.bond;
 
 import com.mvp.investservice.web.dto.Asset;
+import com.mvp.investservice.web.dto.BrandLogoDto;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -30,4 +31,6 @@ public class BondDto extends Asset {
     private String sector;
 
     private RiskLevel riskLevel;
+
+    private BrandLogoDto brandLogo;
 }
