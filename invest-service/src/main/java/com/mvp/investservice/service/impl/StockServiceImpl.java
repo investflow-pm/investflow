@@ -76,7 +76,7 @@ public class StockServiceImpl implements StockService {
             count = 10;
         }
 
-        var tradableStocks = cacheService.getTradableStocksSync(investApi).subList((page - 1) * count, count - 1);
+        var tradableStocks = cacheService.getTradableStocksSync(investApi).subList((page - 1) * count, count);
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : tradableStocks) {
@@ -97,7 +97,7 @@ public class StockServiceImpl implements StockService {
 
         List<Share> stocksBySector = new ArrayList<>();
 
-        for (var i = 0; i < tradableStocks.size() && stocksBySector.size() <= count; i++) {
+        for (var i = 0; i < tradableStocks.size() && stocksBySector.size() < count; i++) {
             var stock = tradableStocks.get(i);
             if (stock.getSector().equalsIgnoreCase(sector)) {
                 stocksBySector.add(stock);

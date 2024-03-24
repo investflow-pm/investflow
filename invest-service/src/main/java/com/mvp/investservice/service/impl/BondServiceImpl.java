@@ -74,7 +74,7 @@ public class BondServiceImpl implements BondService {
             count = 10;
         }
 
-        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count - 1);
+        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count);
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
@@ -95,7 +95,7 @@ public class BondServiceImpl implements BondService {
 
         List<Bond> bondsBySector = new ArrayList<>();
 
-        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() <= count; i++) {
+        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() < count; i++) {
             var bond = tradableBonds.get(i);
             if (bond.getSector().equalsIgnoreCase(sector)) {
                 bondsBySector.add(bond);
