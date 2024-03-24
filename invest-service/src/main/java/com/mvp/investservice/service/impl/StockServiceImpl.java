@@ -1,9 +1,6 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.AssetNotFoundException;
-import com.mvp.investservice.domain.exception.BuyUnavailableException;
-import com.mvp.investservice.domain.exception.InsufficientFundsException;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.*;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
@@ -13,6 +10,7 @@ import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
 import com.mvp.investservice.web.dto.stock.DividendDto;
+import com.mvp.investservice.web.dto.stock.DividendResponse;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.Getter;
@@ -193,7 +191,7 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<DividendDto> getDividends(String figi) {
+    public DividendResponse getDividends(String figi) {
         if (investApi.getInstrumentsService().findInstrumentSync(figi)
                 .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("share")
                                 && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
@@ -201,11 +199,14 @@ public class StockServiceImpl implements StockService {
         }
 
         var dividendsAscDate = investApi.getInstrumentsService().getDividendsSync(figi, Instant.ofEpochSecond(0), Instant.now());
+        if (dividendsAscDate.isEmpty()) {
+            throw new YieldNotFoundException("Дивиденды по акции отстуствуют");
+        }
 
         var dividendsDescDate = new ArrayList<>(dividendsAscDate);
         Collections.reverse(dividendsDescDate);
 
-        return generateDividendsDto(dividendsDescDate);
+        return new DividendResponse(figi, generateDividendsDto(dividendsDescDate));
     }
 
     private List<DividendDto> generateDividendsDto(List<Dividend> dividends) {

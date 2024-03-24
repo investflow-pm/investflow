@@ -1,9 +1,6 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.AssetNotFoundException;
-import com.mvp.investservice.domain.exception.BuyUnavailableException;
-import com.mvp.investservice.domain.exception.InsufficientFundsException;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.*;
 import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
@@ -202,6 +199,11 @@ public class BondServiceImpl implements BondService {
 
         var couponsAscDateAll = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
                 Instant.ofEpochSecond(9_000_000_000L));
+
+        if (couponsAscDateAll.isEmpty()) {
+            throw new YieldNotFoundException("Купоны по облигации отстуствуют");
+        }
+
         var currentCouponsCount = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
                 Instant.now()).stream().count();
 

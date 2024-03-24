@@ -45,9 +45,10 @@ public class StockController {
 
     @GetMapping("/dividends")
     public DividendResponse getDividends(@RequestParam String figi) {
-        return new DividendResponse(figi, stockService.getDividends(figi));
+        return stockService.getDividends(figi);
     }
 
+    // TODO: change try catch to ControllerAdvice
     @PostMapping("/buy")
     public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
         try {
@@ -61,11 +62,5 @@ public class StockController {
     @PostMapping("/sale")
     public OrderResponse<StockDto> saleStock(@RequestBody SaleDto saleDto) {
         return stockService.saleStock(saleDto);
-    }
-
-    @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<?> handleInsufficientFundsException(InsufficientFundsException ex) {
-        record ExceptionBody(String message, Object body) {}
-        return new ResponseEntity<>(new ExceptionBody(ex.getMessage(), ex.getAssetInfo()), HttpStatus.BAD_REQUEST);
     }
 }
