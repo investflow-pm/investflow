@@ -7,7 +7,7 @@
 		<groupId>ru.tinkoff-pm</groupId>
 		<artifactId>investflow</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/>
+<!--		<relativePath/>-->
 	</parent>
 
 	<groupId>ru.tinkoff</groupId>

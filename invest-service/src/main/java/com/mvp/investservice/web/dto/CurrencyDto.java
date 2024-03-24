@@ -15,4 +15,5 @@ public class CurrencyDto extends Asset {
 
     private String countryOfRiskName;
 
+    private BrandLogoDto brandLogo;
 }

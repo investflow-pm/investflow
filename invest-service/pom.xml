@@ -16,7 +16,7 @@
     <description>invest-service</description>
 
     <properties>
-        <tinkoff.version>1.5</tinkoff.version>
+        <tinkoff.version>1.10</tinkoff.version>
     </properties>
 
     <dependencies>

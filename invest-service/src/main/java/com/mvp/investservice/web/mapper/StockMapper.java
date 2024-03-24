@@ -1,6 +1,7 @@
 package com.mvp.investservice.web.mapper;
 
 import com.mvp.investservice.util.MoneyParser;
+import com.mvp.investservice.web.dto.BrandLogoDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.bond.RiskLevel;
 import com.mvp.investservice.web.dto.stock.StockDto;
@@ -28,6 +29,10 @@ public class StockMapper {
         stockDto.setSector(stock.getSector());
         stockDto.setLots((int) stock.getLot());
 
+        stockDto.setBrandLogo(new BrandLogoDto(stock.getBrand().getLogoName(),
+                                                stock.getBrand().getLogoBaseColor(),
+                                                stock.getBrand().getTextColor()));
+
         return stockDto;
     }
 
@@ -35,17 +40,7 @@ public class StockMapper {
         List<StockDto> stockDtoList = new ArrayList<>(stocks.size());
 
         for (var stock : stocks) {
-            var stockDto = new StockDto();
-
-            stockDto.setName(stock.getName());
-            stockDto.setFigi(stock.getFigi());
-            stockDto.setTicker(stock.getTicker());
-            stockDto.setCountryOfRiskName(stock.getCountryOfRiskName());
-            stockDto.setCurrency(stock.getCurrency());
-            stockDto.setSector(stock.getSector());
-            stockDto.setLots((int) stock.getLot());
-
-            stockDtoList.add(stockDto);
+            stockDtoList.add(toDto(stock));
         }
 
         return stockDtoList;

@@ -1,5 +1,6 @@
 package com.mvp.investservice.web.mapper;
 
+import com.mvp.investservice.web.dto.BrandLogoDto;
 import com.mvp.investservice.web.dto.CurrencyDto;
 import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.Currency;
@@ -15,6 +16,10 @@ public class CurrencyMapper {
         currencyDto.setName(currency.getName());
         currencyDto.setTicker(currency.getTicker());
         currencyDto.setCountryOfRiskName(currency.getCountryOfRiskName());
+
+        currencyDto.setBrandLogo(new BrandLogoDto(currency.getBrand().getLogoName(),
+                currency.getBrand().getLogoBaseColor(),
+                currency.getBrand().getTextColor()));
 
         return currencyDto;
     }
