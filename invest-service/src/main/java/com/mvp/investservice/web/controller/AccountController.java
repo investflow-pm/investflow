@@ -7,6 +7,8 @@ import com.mvp.investservice.web.dto.PayInDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("api/v1/invest/accounts")
 @RequiredArgsConstructor

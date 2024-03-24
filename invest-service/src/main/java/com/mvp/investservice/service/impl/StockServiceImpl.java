@@ -2,6 +2,7 @@ package com.mvp.investservice.service.impl;
 
 import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
+import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.service.cache.CacheService;
@@ -10,8 +11,8 @@ import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
-import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
+import com.mvp.investservice.web.dto.stock.DividendDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,11 @@ import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +37,7 @@ public class StockServiceImpl implements StockService {
     private final InvestApi investApi;
     private final StockMapper stockMapper;
     private final PortfolioServiceImpl portfolioService;
+    private final AccountServiceImpl accountService;
 
     @Override
     public List<StockDto>  getStocksByName(String name) {
@@ -96,14 +102,17 @@ public class StockServiceImpl implements StockService {
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : stocksBySector) {
-            stocks.add(stockMapper.toDto(stock));
+            var temp = stockMapper.toDto(stock);
+            temp.setSector(SectorStockUtil.valueOfEnglishName(temp.getSector()));
+
+            stocks.add(temp);
         }
 
         return stocks;
     }
 
     @Override
-    public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
+    public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) throws InsufficientFundsException {
         Share shareToBuy;
         try {
             shareToBuy = investApi.getInstrumentsService()
@@ -117,6 +126,12 @@ public class StockServiceImpl implements StockService {
             BigDecimal price = getBigDecimalPrice(figi);
             Quotation resultPrice = getPrice(price);
             PostOrderResponse postOrderResponse;
+
+            var balance = accountService.getBalance(purchaseDto.getAccountId());
+            if (balance.compareTo(price) <= 0) {
+                throw new InsufficientFundsException(price, balance);
+            }
+
             try {
                 postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
@@ -169,6 +184,40 @@ public class StockServiceImpl implements StockService {
         } catch (Exception e) {
             throw new AssetNotFoundException(e.getMessage());
         }
+    }
+
+// TODO
+    @Override
+    public List<DividendDto> getDividends(String figi) {
+        if (investApi.getInstrumentsService().findInstrumentSync(figi)
+                .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("share")
+                                && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
+            throw new AssetNotFoundException("Акция не найдена");
+        }
+
+        var dividendsAscDate = investApi.getInstrumentsService().getDividendsSync(figi, Instant.ofEpochSecond(0), Instant.now());
+
+        var dividendsDescDate = new ArrayList<>(dividendsAscDate);
+        Collections.reverse(dividendsDescDate);
+
+
+        return null;
+    }
+
+    private List<DividendDto> generateDividendsDto(List<Dividend> dividends) {
+        var dividendsDto = new ArrayList<DividendDto>();
+
+//        for (var div : dividends) {
+//            var dividendDto = new DividendDto();
+//
+//            dividendDto.setDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(div.getPaymentDate().getSeconds()),
+//                    ZoneId.systemDefault()));
+//            dividendDto.setPaymentPerShare(new BigDecimal(div.getDividendNet().getUnits()).movePointRight());
+//            dividendDto.setCurrency(div.getDividendNet().getCurrency());
+//            dividendDto.setInterestIncome();
+//        }
+
+        return dividendsDto;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.mvp.investservice.service.impl;
 
 import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
+import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.cache.CacheService;
@@ -31,6 +32,7 @@ public class BondServiceImpl implements BondService {
     private final InvestApi investApi;
     private final BondMapper bondMapper;
     private final PortfolioServiceImpl portfolioService;
+    private final AccountServiceImpl accountService;
 
     @Override
     public List<BondDto> getBondsByName(String name) {
@@ -102,11 +104,10 @@ public class BondServiceImpl implements BondService {
     }
 
     @Override
-    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) {
+    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) throws InsufficientFundsException {
         Bond purchasedBond = null;
         try {
-            purchasedBond = investApi.getInstrumentsService()
-                    .getBondByFigiSync(purchasedBond.getFigi());
+            purchasedBond = investApi.getInstrumentsService().getBondByFigiSync(purchaseDto.getFigi());
         } catch (Exception e) {
             throw new AssetNotFoundException(e.getMessage());
         }
@@ -115,6 +116,12 @@ public class BondServiceImpl implements BondService {
             var figi = purchasedBond.getFigi();
             var price = getBigDecimalPrice(figi);
             var resultPrice = getPrice(price);
+
+            var balance = accountService.getBalance(purchaseDto.getAccountId());
+            if (balance.compareTo(price) <= 0) {
+                throw new InsufficientFundsException(price, balance);
+            }
+
             try {
                 var postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY,

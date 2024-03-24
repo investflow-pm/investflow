@@ -68,6 +68,14 @@ public class AccountServiceImpl implements AccountService {
         return balanceDto;
     }
 
+    // return RUB balance
+    @Override
+    public BigDecimal getBalance(String accountId) {
+        var balance = investApi.getSandboxService().payInSync(accountId, MoneyValue.newBuilder().build());
+
+        return MoneyParser.moneyValueToBigDecimal(balance);
+    }
+
     @Override
     public AccountDto getAccount() {
         Account account = investApi.getSandboxService().getAccountsSync().get(0);

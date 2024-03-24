@@ -1,6 +1,7 @@
 package com.mvp.investservice.web.controller;
 
 
+import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
@@ -8,6 +9,8 @@ import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,11 +42,22 @@ public class StockController {
 
     @PostMapping("/buy")
     public OrderResponse<StockDto> buyStock(@RequestBody PurchaseDto purchaseDto) {
-        return stockService.buyStock(purchaseDto);
+        try {
+            return stockService.buyStock(purchaseDto);
+        }
+        catch (InsufficientFundsException ex) {
+            throw new InsufficientFundsException(ex.getAssetInfo());
+        }
     }
 
     @PostMapping("/sale")
     public OrderResponse<StockDto> saleStock(@RequestBody SaleDto saleDto) {
         return stockService.saleStock(saleDto);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<?> handleInsufficientFundsException(InsufficientFundsException ex) {
+        record ExceptionBody(String message, Object body) {}
+        return new ResponseEntity<>(new ExceptionBody(ex.getMessage(), ex.getAssetInfo()), HttpStatus.BAD_REQUEST);
     }
 }
