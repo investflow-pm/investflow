@@ -2,6 +2,7 @@ package com.mvp.investservice.service.impl;
 
 import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
+import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.service.cache.CacheService;
@@ -9,6 +10,9 @@ import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
+import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
+import com.mvp.investservice.web.dto.stock.DividendDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +21,12 @@ import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +37,8 @@ public class StockServiceImpl implements StockService {
     private final CacheService cacheService;
     private final InvestApi investApi;
     private final StockMapper stockMapper;
+    private final PortfolioServiceImpl portfolioService;
+    private final AccountServiceImpl accountService;
 
     @Override
     public List<StockDto>  getStocksByName(String name) {
@@ -92,14 +103,17 @@ public class StockServiceImpl implements StockService {
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : stocksBySector) {
-            stocks.add(stockMapper.toDto(stock));
+            var temp = stockMapper.toDto(stock);
+            temp.setSector(SectorStockUtil.valueOfEnglishName(temp.getSector()));
+
+            stocks.add(temp);
         }
 
         return stocks;
     }
 
     @Override
-    public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) {
+    public OrderResponse<StockDto> buyStock(PurchaseDto purchaseDto) throws InsufficientFundsException {
         Share shareToBuy;
         try {
             shareToBuy = investApi.getInstrumentsService()
@@ -111,8 +125,14 @@ public class StockServiceImpl implements StockService {
         if (shareToBuy.getBuyAvailableFlag() && shareToBuy.getApiTradeAvailableFlag()) {
             String figi = shareToBuy.getFigi();
             BigDecimal price = getBigDecimalPrice(figi);
-            Quotation resultPrice = getPurchasePrice(price);
+            Quotation resultPrice = getPrice(price);
             PostOrderResponse postOrderResponse;
+
+            var balance = accountService.getBalance(purchaseDto.getAccountId());
+            if (balance.compareTo(price) <= 0) {
+                throw new InsufficientFundsException(price, balance);
+            }
+
             try {
                 postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY, purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()), UUID.randomUUID().toString());
@@ -126,6 +146,93 @@ public class StockServiceImpl implements StockService {
         }
     }
 
+    @Override
+    public OrderResponse<StockDto> saleStock(SaleDto saleDto) {
+        StockDto saleStock = null;
+        try {
+            var portfolio = new PortfolioRequest();
+            portfolio.setAccountId(saleDto.getAccountId());
+
+            var positions = portfolioService.getPortfolioPositions(portfolio);
+            if (positions.isEmpty()) {
+                throw new AssetNotFoundException("В портфеле отсутсвуют ценные бумаги");
+            }
+
+            for (var asset : portfolioService.getPortfolioPositions(portfolio)) {
+                if (asset.getAsset() instanceof StockDto) {
+                    if (((StockDto)asset.getAsset()).getFigi().equalsIgnoreCase(saleDto.getFigi())) {
+                        saleStock = (StockDto)asset.getAsset();
+                        break;
+                    }
+                }
+            }
+
+            if (saleStock == null) {
+                throw new AssetNotFoundException("В портфеле отсутсвует выбранная акция");
+            }
+
+            var saleResponse = investApi.getOrdersService()
+                    .postOrderSync(saleStock.getFigi(),
+                            saleDto.getLot(),
+                            getPrice(getBigDecimalPrice(saleStock.getFigi())),
+                            OrderDirection.ORDER_DIRECTION_SELL,
+                            saleDto.getAccountId(),
+                            OrderType.valueOf(saleDto.getOrderType().name()),
+                            UUID.randomUUID().toString());
+
+            return generateOrderResponse(saleStock, saleResponse);
+
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<DividendDto> getDividends(String figi) {
+        if (investApi.getInstrumentsService().findInstrumentSync(figi)
+                .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("share")
+                                && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
+            throw new AssetNotFoundException("Акция не найдена");
+        }
+
+        var dividendsAscDate = investApi.getInstrumentsService().getDividendsSync(figi, Instant.ofEpochSecond(0), Instant.now());
+
+        var dividendsDescDate = new ArrayList<>(dividendsAscDate);
+        Collections.reverse(dividendsDescDate);
+
+        return generateDividendsDto(dividendsDescDate);
+    }
+
+    private List<DividendDto> generateDividendsDto(List<Dividend> dividends) {
+        var dividendsDto = new ArrayList<DividendDto>();
+
+        for (var div : dividends) {
+            var dividendDto = new DividendDto();
+
+            dividendDto.setDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(div.getLastBuyDate().getSeconds()),
+                    ZoneId.systemDefault()));
+            dividendDto.setPaymentPerShare(convertToBigDecimal(div.getDividendNet()));
+            dividendDto.setCurrency(div.getDividendNet().getCurrency());
+            dividendDto.setInterestIncome(convertToBigDecimal(div.getYieldValue()));
+
+            dividendsDto.add(dividendDto);
+        }
+
+        return dividendsDto;
+    }
+
+    // переводит units и nano из Quotation в значение BigDecimal
+    private static BigDecimal convertToBigDecimal(Quotation value) {
+        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
+        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
+    }
+
+    // переводит units и nano из MoneyValue в значение BigDecimal
+    private static BigDecimal convertToBigDecimal(MoneyValue value) {
+        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
+        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
      * @param shareToBuy - акция, которая будет куплена пользователем
@@ -135,6 +242,10 @@ public class StockServiceImpl implements StockService {
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
         StockDto stockDto = stockMapper.toDto(shareToBuy);
 
+        return setOrderResponseFields(postOrderResponse, stockDto);
+    }
+
+    private OrderResponse<StockDto> generateOrderResponse(StockDto stockDto, PostOrderResponse postOrderResponse) {
         return setOrderResponseFields(postOrderResponse, stockDto);
     }
 
@@ -158,7 +269,7 @@ public class StockServiceImpl implements StockService {
      * @param price
      * @return Quotation (units - рубли, nanos - копейки)
      */
-    private Quotation getPurchasePrice(BigDecimal price) {
+    private Quotation getPrice(BigDecimal price) {
 
         return Quotation.newBuilder()
                 .setUnits(price != null ? price.longValue() : 0)

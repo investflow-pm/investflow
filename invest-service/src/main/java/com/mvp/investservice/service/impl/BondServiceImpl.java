@@ -2,6 +2,7 @@ package com.mvp.investservice.service.impl;
 
 import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
+import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.cache.CacheService;
@@ -9,7 +10,9 @@ import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.util.SectorBondUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
+import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
 import com.mvp.investservice.web.mapper.BondMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ public class BondServiceImpl implements BondService {
     private final CacheService cacheService;
     private final InvestApi investApi;
     private final BondMapper bondMapper;
+    private final PortfolioServiceImpl portfolioService;
+    private final AccountServiceImpl accountService;
 
     @Override
     public List<BondDto> getBondsByName(String name) {
@@ -99,11 +104,10 @@ public class BondServiceImpl implements BondService {
     }
 
     @Override
-    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) {
+    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) throws InsufficientFundsException {
         Bond purchasedBond = null;
         try {
-            purchasedBond = investApi.getInstrumentsService()
-                    .getBondByFigiSync(purchasedBond.getFigi());
+            purchasedBond = investApi.getInstrumentsService().getBondByFigiSync(purchaseDto.getFigi());
         } catch (Exception e) {
             throw new AssetNotFoundException(e.getMessage());
         }
@@ -111,7 +115,13 @@ public class BondServiceImpl implements BondService {
         if (purchasedBond.getBuyAvailableFlag() && purchasedBond.getApiTradeAvailableFlag()) {
             var figi = purchasedBond.getFigi();
             var price = getBigDecimalPrice(figi);
-            var resultPrice = getPurchasePrice(price);
+            var resultPrice = getPrice(price);
+
+            var balance = accountService.getBalance(purchaseDto.getAccountId());
+            if (balance.compareTo(price) <= 0) {
+                throw new InsufficientFundsException(price, balance);
+            }
+
             try {
                 var postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY,
@@ -127,16 +137,63 @@ public class BondServiceImpl implements BondService {
         }
     }
 
+
+
+    @Override
+    public OrderResponse<BondDto> saleBond(SaleDto saleDto) {
+        BondDto saleBond = null;
+        try {
+            var portfolio = new PortfolioRequest();
+            portfolio.setAccountId(saleDto.getAccountId());
+
+            var positions = portfolioService.getPortfolioPositions(portfolio);
+            if (positions.isEmpty()) {
+                throw new AssetNotFoundException("В портфеле отсутсвуют ценные бумаги");
+            }
+
+            for (var asset : portfolioService.getPortfolioPositions(portfolio)) {
+                if (asset.getAsset() instanceof BondDto) {
+                    if (((BondDto)asset.getAsset()).getFigi().equalsIgnoreCase(saleDto.getFigi())) {
+                        saleBond = (BondDto)asset.getAsset();
+                        break;
+                    }
+                }
+            }
+
+            if (saleBond == null) {
+                throw new AssetNotFoundException("В портфеле отсутсвует выбранная облигация");
+            }
+
+            var saleResponse = investApi.getOrdersService()
+                    .postOrderSync(saleBond.getFigi(),
+                                    saleDto.getLot(),
+                                    getPrice(getBigDecimalPrice(saleBond.getFigi())),
+                                    OrderDirection.ORDER_DIRECTION_SELL,
+                                    saleDto.getAccountId(),
+                                    OrderType.valueOf(saleDto.getOrderType().name()),
+                                    UUID.randomUUID().toString());
+
+            return generateOrderResponse(saleBond, saleResponse);
+
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
-     * @param purchasedBond - акция, которая будет куплена пользователем
+     * @param bond - акция, которая будет куплена пользователем
      * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
      * @return
      */
-    private OrderResponse<BondDto> generateOrderResponse(Bond purchasedBond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(purchasedBond);
+    private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
+        BondDto bondDto = bondMapper.toDto(bond);
 
         return setOrderResponseFields(postOrderResponse, bondDto);
+    }
+
+    private OrderResponse<BondDto> generateOrderResponse(BondDto bond, PostOrderResponse postOrderResponse) {
+        return setOrderResponseFields(postOrderResponse, bond);
     }
 
     private OrderResponse<BondDto> setOrderResponseFields(PostOrderResponse postOrderResponse, BondDto bondDto) {
@@ -159,7 +216,7 @@ public class BondServiceImpl implements BondService {
      * @param price
      * @return Quotation (units - рубли, nanos - копейки)
      */
-    private Quotation getPurchasePrice(BigDecimal price) {
+    private Quotation getPrice(BigDecimal price) {
 
         return Quotation.newBuilder()
                 .setUnits(price != null ? price.longValue() : 0)
