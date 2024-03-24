@@ -32,10 +32,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class StockServiceImpl implements StockService {
-
     private final CacheService cacheService;
 
     @Getter
@@ -223,18 +224,6 @@ public class StockServiceImpl implements StockService {
         }
 
         return dividendsDto;
-    }
-
-    // переводит units и nano из Quotation в значение BigDecimal
-    public static BigDecimal convertToBigDecimal(Quotation value) {
-        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
-        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
-    }
-
-    // переводит units и nano из MoneyValue в значение BigDecimal
-    public static BigDecimal convertToBigDecimal(MoneyValue value) {
-        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
-        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
     }
 
     public BigDecimal getLastPrice(String figi) {

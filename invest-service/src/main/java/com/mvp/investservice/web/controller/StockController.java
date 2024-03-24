@@ -3,11 +3,13 @@ package com.mvp.investservice.web.controller;
 
 import com.mvp.investservice.domain.exception.InsufficientFundsException;
 import com.mvp.investservice.service.StockService;
+import com.mvp.investservice.service.impl.StockServiceImpl;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
 import com.mvp.investservice.web.dto.stock.DividendDto;
+import com.mvp.investservice.web.dto.stock.DividendResponse;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,8 +44,8 @@ public class StockController {
     }
 
     @GetMapping("/dividends")
-    public List<DividendDto> getDividends(@RequestParam String figi) {
-        return stockService.getDividends(figi);
+    public DividendResponse getDividends(@RequestParam String figi) {
+        return new DividendResponse(figi, stockService.getDividends(figi));
     }
 
     @PostMapping("/buy")

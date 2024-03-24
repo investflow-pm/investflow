@@ -14,6 +14,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
+
 @Component
 public class BondMapper {
 
@@ -31,6 +33,8 @@ public class BondMapper {
         bondDto.setPlacementPrice(MoneyParser.moneyValueToBigDecimal(bond.getPlacementPrice()));
         bondDto.setRiskLevel(RiskLevel.valueOf(bond.getRiskLevel().name()));
         bondDto.setCouponQuantityPerYear(bond.getCouponQuantityPerYear());
+
+        bondDto.setPrice(convertToBigDecimal(bond.getNominal()));
 
         bondDto.setBrandLogo(new BrandLogoDto(bond.getBrand().getLogoName(),
                 bond.getBrand().getLogoBaseColor(),
