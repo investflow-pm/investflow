@@ -1,24 +1,19 @@
 package com.mvp.investservice.web.mapper;
 
-import com.mvp.investservice.util.MoneyParser;
+import com.mvp.investservice.service.impl.StockServiceImpl;
 import com.mvp.investservice.web.dto.BrandLogoDto;
-import com.mvp.investservice.web.dto.bond.BondDto;
-import com.mvp.investservice.web.dto.bond.RiskLevel;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import org.springframework.stereotype.Component;
-import ru.tinkoff.piapi.contract.v1.Bond;
 import ru.tinkoff.piapi.contract.v1.Share;
+import ru.tinkoff.piapi.core.InvestApi;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class StockMapper {
-
-    public StockDto toDto(Share stock) {
+    public StockDto toDto(Share stock, BigDecimal lastPrice) {
         StockDto stockDto = new StockDto();
 
         stockDto.setName(stock.getName());
@@ -29,6 +24,10 @@ public class StockMapper {
         stockDto.setSector(stock.getSector());
         stockDto.setLots((int) stock.getLot());
 
+        if (lastPrice != null) {
+            stockDto.setPrice(lastPrice);
+        }
+
         stockDto.setBrandLogo(new BrandLogoDto(stock.getBrand().getLogoName(),
                                                 stock.getBrand().getLogoBaseColor(),
                                                 stock.getBrand().getTextColor()));
@@ -36,11 +35,11 @@ public class StockMapper {
         return stockDto;
     }
 
-    public List<StockDto> toDto(List<Share> stocks) {
+    public List<StockDto> toDto(List<Share> stocks, List<BigDecimal> lastPrices) {
         List<StockDto> stockDtoList = new ArrayList<>(stocks.size());
 
-        for (var stock : stocks) {
-            stockDtoList.add(toDto(stock));
+        for (int i = 0; i < stocks.size(); i++) {
+            stockDtoList.add(toDto(stocks.get(i), lastPrices.get(i)));
         }
 
         return stockDtoList;

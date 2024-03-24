@@ -120,7 +120,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             case "share" -> {
                 Share share = investApi.getInstrumentsService()
                         .getShareByFigiSync(position.getFigi());
-                asset = stockMapper.toDto(share);
+                asset = stockMapper.toDto(share, null);
             }
             case "bond" -> {
                 Bond bond = investApi.getInstrumentsService()
