@@ -1,9 +1,6 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.AssetNotFoundException;
-import com.mvp.investservice.domain.exception.BuyUnavailableException;
-import com.mvp.investservice.domain.exception.InsufficientFundsException;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.*;
 import com.mvp.investservice.service.StockService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
@@ -13,9 +10,12 @@ import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
 import com.mvp.investservice.web.dto.stock.DividendDto;
+import com.mvp.investservice.web.dto.stock.DividendResponse;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import com.mvp.investservice.web.mapper.StockMapper;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
@@ -30,11 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class StockServiceImpl implements StockService {
-
     private final CacheService cacheService;
+
+    @Getter
     private final InvestApi investApi;
     private final StockMapper stockMapper;
     private final PortfolioServiceImpl portfolioService;
@@ -61,7 +64,7 @@ public class StockServiceImpl implements StockService {
             stocks.add(investApi.getInstrumentsService().getShareByFigiSync(figi));
         }
 
-        return stockMapper.toDto(stocks);
+        return stockMapper.toDto(stocks, getLastPrices(stocksFigis));
     }
 
     @Override
@@ -77,7 +80,7 @@ public class StockServiceImpl implements StockService {
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : tradableStocks) {
-            stocks.add(stockMapper.toDto(stock));
+            stocks.add(stockMapper.toDto(stock, getLastPrice(stock.getFigi())));
         }
 
         return stocks;
@@ -103,7 +106,7 @@ public class StockServiceImpl implements StockService {
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : stocksBySector) {
-            var temp = stockMapper.toDto(stock);
+            var temp = stockMapper.toDto(stock, getLastPrice(stock.getFigi()));
             temp.setSector(SectorStockUtil.valueOfEnglishName(temp.getSector()));
 
             stocks.add(temp);
@@ -188,7 +191,7 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<DividendDto> getDividends(String figi) {
+    public DividendResponse getDividends(String figi) {
         if (investApi.getInstrumentsService().findInstrumentSync(figi)
                 .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("share")
                                 && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
@@ -196,11 +199,14 @@ public class StockServiceImpl implements StockService {
         }
 
         var dividendsAscDate = investApi.getInstrumentsService().getDividendsSync(figi, Instant.ofEpochSecond(0), Instant.now());
+        if (dividendsAscDate.isEmpty()) {
+            throw new YieldNotFoundException("Дивиденды по акции отстуствуют");
+        }
 
         var dividendsDescDate = new ArrayList<>(dividendsAscDate);
         Collections.reverse(dividendsDescDate);
 
-        return generateDividendsDto(dividendsDescDate);
+        return new DividendResponse(figi, generateDividendsDto(dividendsDescDate));
     }
 
     private List<DividendDto> generateDividendsDto(List<Dividend> dividends) {
@@ -221,16 +227,22 @@ public class StockServiceImpl implements StockService {
         return dividendsDto;
     }
 
-    // переводит units и nano из Quotation в значение BigDecimal
-    private static BigDecimal convertToBigDecimal(Quotation value) {
-        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
-        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
+    public BigDecimal getLastPrice(String figi) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(List.of(figi)).get(0).getPrice();
+
+        return convertToBigDecimal(lastPrice);
     }
 
-    // переводит units и nano из MoneyValue в значение BigDecimal
-    private static BigDecimal convertToBigDecimal(MoneyValue value) {
-        BigDecimal nanoAsDecimal = new BigDecimal(value.getNano()).divide(new BigDecimal(1_000_000_000), 9, RoundingMode.HALF_UP);
-        return new BigDecimal(value.getUnits()).add(nanoAsDecimal);
+    public List<BigDecimal> getLastPrices(List<String> figis) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(figis);
+
+        List<BigDecimal> lastPriceDecimal = new ArrayList<>(lastPrice.size());
+
+        for (var i : lastPrice) {
+            lastPriceDecimal.add(convertToBigDecimal(i.getPrice()));
+        }
+
+        return lastPriceDecimal;
     }
 
     /**
@@ -240,7 +252,7 @@ public class StockServiceImpl implements StockService {
      * @return
      */
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
-        StockDto stockDto = stockMapper.toDto(shareToBuy);
+        StockDto stockDto = stockMapper.toDto(shareToBuy, null);
 
         return setOrderResponseFields(postOrderResponse, stockDto);
     }

@@ -7,6 +7,8 @@ import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
+import com.mvp.investservice.web.dto.bond.CouponResponse;
+import com.mvp.investservice.web.dto.stock.DividendResponse;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,11 @@ public class BondController {
     public List<BondDto> getBondsBySector(@PathVariable String sectorName,
                                             @RequestParam(value = "count") Integer count) {
         return bondService.getBondsBySector(sectorName, count);
+    }
+
+    @GetMapping("/coupons")
+    public CouponResponse getCoupons(@RequestParam String figi) {
+        return bondService.getCoupons(figi);
     }
 
     @PostMapping("/buy")
