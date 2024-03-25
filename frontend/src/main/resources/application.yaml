@@ -11,6 +11,9 @@ auth:
   loginLink: ${LOGIN_USER_LINK}
   registerLink: ${REGISTER_USER_LINK}
 
+invest:
+  portfolioLink: ${PORTFOLIO_LINK}
+
 eureka:
   client:
     service-url:

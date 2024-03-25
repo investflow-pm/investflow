@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import ru.tinkoff.piapi.core.InvestApi;
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,12 +21,14 @@ public class Report {
     private static Workbook wb = new HSSFWorkbook();
     private static Sheet sheet;
     private static String[] headers = new String[12];
+
     public static void createSheet() throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filename)){
-            wb. write(fos);
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            wb.write(fos);
             System.out.println(sheetname + " report rady");
         }
     }
+
     public Report setTitle(String title1) {
         Row row = sheet.createRow(2);
         Cell cell = row.createCell(2);
@@ -34,7 +37,7 @@ public class Report {
 
     public Report setSheetname(String sheetname) {
         Report.sheetname = sheetname;
-        sheet= wb.createSheet(sheetname);
+        sheet = wb.createSheet(sheetname);
         return this;
     }
 
@@ -48,19 +51,21 @@ public class Report {
         header(headers);
         return this;
     }
+
     private void header(String[] headers) {
         Row row = sheet.createRow(1);
         int i = 0;
-        for (String s: headers) {
+        for (String s : headers) {
             Cell cell = row.createCell(i++);
             cell.setCellValue(s);
         }
     }
+
     public Report setDataFigi(ArrayList<String> positions) {
         int i = 2;
         var api = InvestApi.create("t.RFkt3RdHtuLiYL9hb4eidouNRYGOTkQI_Dv7sB4pE-nJsi3MqguKzX0s2pGl-BzqteLfaIbLD0Huh8rrwIqYgw");
         InfoInstruments infoInstruments = new InfoInstruments(api);
-        for (String s: positions) {
+        for (String s : positions) {
             int j = 0;
             Row row = sheet.createRow(i++);
 
@@ -92,15 +97,15 @@ public class Report {
             int cellPosition = 0;
             Row row = sheet.createRow(rowPosition++);
 
-            Cell cellOperationId  = row.createCell(cellPosition++);
+            Cell cellOperationId = row.createCell(cellPosition++);
             cellOperationId.setCellValue(operationResponse.getOperations()
                     .get(operationIterator).getOperationId().toString());
 
-            Cell cellInstrumentType  = row.createCell(cellPosition++);
+            Cell cellInstrumentType = row.createCell(cellPosition++);
             cellInstrumentType.setCellValue(operationResponse.getOperations()
                     .get(operationIterator).getInstrumentType());
 
-            Cell cellAssertName  = row.createCell(cellPosition++);
+            Cell cellAssertName = row.createCell(cellPosition++);
             cellAssertName.setCellValue(operationResponse.getOperations()
                     .get(operationIterator).getAssetName());
 

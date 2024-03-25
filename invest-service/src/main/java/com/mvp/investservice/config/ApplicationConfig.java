@@ -4,12 +4,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.mvp.investservice.service.props.InvestProperties;
 import com.mvp.investservice.web.handler.RestTemplateErrorHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
-import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -30,6 +28,7 @@ public class ApplicationConfig {
     }
 
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplateBuilder()
                 .errorHandler(new RestTemplateErrorHandler())
