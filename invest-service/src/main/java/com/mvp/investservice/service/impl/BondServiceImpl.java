@@ -1,15 +1,18 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.AssetNotFoundException;
-import com.mvp.investservice.domain.exception.BuyUnavailableException;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.*;
 import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.util.SectorBondUtil;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
+import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
+import com.mvp.investservice.web.dto.bond.CouponDto;
+import com.mvp.investservice.web.dto.bond.CouponResponse;
+import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
+import com.mvp.investservice.web.dto.stock.DividendDto;
 import com.mvp.investservice.web.mapper.BondMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,17 +20,26 @@ import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class BondServiceImpl implements BondService {
-
     private final CacheService cacheService;
+
     private final InvestApi investApi;
     private final BondMapper bondMapper;
+    private final PortfolioServiceImpl portfolioService;
+    private final AccountServiceImpl accountService;
 
     @Override
     public List<BondDto> getBondsByName(String name) {
@@ -62,7 +74,7 @@ public class BondServiceImpl implements BondService {
             count = 10;
         }
 
-        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count - 1);
+        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count);
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
@@ -83,7 +95,7 @@ public class BondServiceImpl implements BondService {
 
         List<Bond> bondsBySector = new ArrayList<>();
 
-        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() <= count; i++) {
+        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() < count; i++) {
             var bond = tradableBonds.get(i);
             if (bond.getSector().equalsIgnoreCase(sector)) {
                 bondsBySector.add(bond);
@@ -99,11 +111,10 @@ public class BondServiceImpl implements BondService {
     }
 
     @Override
-    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) {
+    public OrderResponse<BondDto> buyBond(PurchaseDto purchaseDto) throws InsufficientFundsException {
         Bond purchasedBond = null;
         try {
-            purchasedBond = investApi.getInstrumentsService()
-                    .getBondByFigiSync(purchasedBond.getFigi());
+            purchasedBond = investApi.getInstrumentsService().getBondByFigiSync(purchaseDto.getFigi());
         } catch (Exception e) {
             throw new AssetNotFoundException(e.getMessage());
         }
@@ -111,7 +122,13 @@ public class BondServiceImpl implements BondService {
         if (purchasedBond.getBuyAvailableFlag() && purchasedBond.getApiTradeAvailableFlag()) {
             var figi = purchasedBond.getFigi();
             var price = getBigDecimalPrice(figi);
-            var resultPrice = getPurchasePrice(price);
+            var resultPrice = getPrice(price);
+
+            var balance = accountService.getBalance(purchaseDto.getAccountId());
+            if (balance.compareTo(price) <= 0) {
+                throw new InsufficientFundsException(price, balance);
+            }
+
             try {
                 var postOrderResponse = investApi.getOrdersService()
                         .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_BUY,
@@ -127,16 +144,122 @@ public class BondServiceImpl implements BondService {
         }
     }
 
+
+
+    @Override
+    public OrderResponse<BondDto> saleBond(SaleDto saleDto) {
+        BondDto saleBond = null;
+        try {
+            var portfolio = new PortfolioRequest();
+            portfolio.setAccountId(saleDto.getAccountId());
+
+            var positions = portfolioService.getPortfolioPositions(portfolio);
+            if (positions.isEmpty()) {
+                throw new AssetNotFoundException("В портфеле отсутсвуют ценные бумаги");
+            }
+
+            for (var asset : portfolioService.getPortfolioPositions(portfolio)) {
+                if (asset.getAsset() instanceof BondDto) {
+                    if (((BondDto)asset.getAsset()).getFigi().equalsIgnoreCase(saleDto.getFigi())) {
+                        saleBond = (BondDto)asset.getAsset();
+                        break;
+                    }
+                }
+            }
+
+            if (saleBond == null) {
+                throw new AssetNotFoundException("В портфеле отсутсвует выбранная облигация");
+            }
+
+            var saleResponse = investApi.getOrdersService()
+                    .postOrderSync(saleBond.getFigi(),
+                                    saleDto.getLot(),
+                                    getPrice(getBigDecimalPrice(saleBond.getFigi())),
+                                    OrderDirection.ORDER_DIRECTION_SELL,
+                                    saleDto.getAccountId(),
+                                    OrderType.valueOf(saleDto.getOrderType().name()),
+                                    UUID.randomUUID().toString());
+
+            return generateOrderResponse(saleBond, saleResponse);
+
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CouponResponse getCoupons(String figi) {
+        if (investApi.getInstrumentsService().findInstrumentSync(figi)
+                .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("bond")
+                        && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
+            throw new AssetNotFoundException("Облигация не найдена");
+        }
+
+        var bond = investApi.getInstrumentsService().getBondByFigiSync(figi);
+
+        var couponsAscDateAll = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
+                Instant.ofEpochSecond(9_000_000_000L));
+
+        if (couponsAscDateAll.isEmpty()) {
+            throw new YieldNotFoundException("Купоны по облигации отстуствуют");
+        }
+
+        var currentCouponsCount = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
+                Instant.now()).stream().count();
+
+        var couponsDescDate = new ArrayList<>(couponsAscDateAll);
+        Collections.reverse(couponsDescDate);
+
+        var nextPaymentDate = LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(couponsAscDateAll.get((int)currentCouponsCount)
+                        .getCouponDate().getSeconds()), ZoneId.systemDefault());
+
+        return new CouponResponse(figi,
+                nextPaymentDate,
+                currentCouponsCount,
+                couponsDescDate.stream().count(),
+                generateCouponsDto(couponsDescDate, currentCouponsCount, bond));
+    }
+
+    private List<CouponDto> generateCouponsDto(List<Coupon> coupons, Long countCouponsNow, Bond bond) {
+        var couponsDto = new ArrayList<CouponDto>();
+
+        for (var coupon : coupons) {
+            var couponDto = new CouponDto();
+
+            couponDto.setCouponDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(coupon.getCouponDate().getSeconds()),
+                    ZoneId.systemDefault()));
+            couponDto.setAccumulatedCouponIncome(convertToBigDecimal(bond.getAciValue()));
+            couponDto.setCouponNumber(coupon.getCouponNumber());
+            couponDto.setPayment(convertToBigDecimal(coupon.getPayOneBond()));
+            couponDto.setCurrency(coupon.getPayOneBond().getCurrency());
+
+            var percent = convertToBigDecimal(coupon.getPayOneBond())
+                            .multiply(BigDecimal.valueOf(bond.getCouponQuantityPerYear())
+                            .multiply(BigDecimal.valueOf(100)))
+                    .divide(convertToBigDecimal(bond.getNominal()));
+            couponDto.setInterestIncome(percent);
+
+            couponsDto.add(couponDto);
+        }
+
+        return couponsDto;
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
-     * @param purchasedBond - акция, которая будет куплена пользователем
+     * @param bond - акция, которая будет куплена пользователем
      * @param postOrderResponse - ответ от tinkoff api о выставленной заявке/покупке
      * @return
      */
-    private OrderResponse<BondDto> generateOrderResponse(Bond purchasedBond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(purchasedBond);
+    private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
+        BondDto bondDto = bondMapper.toDto(bond);
 
         return setOrderResponseFields(postOrderResponse, bondDto);
+    }
+
+    private OrderResponse<BondDto> generateOrderResponse(BondDto bond, PostOrderResponse postOrderResponse) {
+        return setOrderResponseFields(postOrderResponse, bond);
     }
 
     private OrderResponse<BondDto> setOrderResponseFields(PostOrderResponse postOrderResponse, BondDto bondDto) {
@@ -159,7 +282,7 @@ public class BondServiceImpl implements BondService {
      * @param price
      * @return Quotation (units - рубли, nanos - копейки)
      */
-    private Quotation getPurchasePrice(BigDecimal price) {
+    private Quotation getPrice(BigDecimal price) {
 
         return Quotation.newBuilder()
                 .setUnits(price != null ? price.longValue() : 0)

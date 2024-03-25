@@ -2,6 +2,7 @@ package com.mvp.investservice.web.controller;
 
 import com.mvp.investservice.domain.exception.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,17 @@ public class ControllerAdvice {
 
     @ExceptionHandler(UpdateException.class)
     public ExceptionBody handleUpdateException(UpdateException exception) {
+        return new ExceptionBody(exception.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<?> handleInsufficientFundsException(InsufficientFundsException ex) {
+        record ExceptionBody(String message, Object body) {}
+        return new ResponseEntity<>(new ExceptionBody(ex.getMessage(), ex.getAssetInfo()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(YieldNotFoundException.class)
+    public ExceptionBody handleYieldNotFoundException(YieldNotFoundException exception) {
         return new ExceptionBody(exception.getMessage());
     }
 

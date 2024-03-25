@@ -40,13 +40,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PositionResponse> getPortfolioPositions(PortfolioRequest portfolioRequest) {
-        Portfolio portfolio = investApi.getOperationsService()
-                .getPortfolioSync(portfolioRequest.getAccountId());
-
-        List<Position> positions = portfolio.getPositions();
-
-        return null;
-
+        return this.getPortfolio(portfolioRequest).getPositions();
     }
 
     @Override
@@ -123,7 +117,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             case "share" -> {
                 Share share = investApi.getInstrumentsService()
                         .getShareByFigiSync(position.getFigi());
-                asset = stockMapper.toDto(share);
+                asset = stockMapper.toDto(share, null);
             }
             case "bond" -> {
                 Bond bond = investApi.getInstrumentsService()
