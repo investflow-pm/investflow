@@ -1,6 +1,7 @@
 package com.mvp.investservice.web.mapper;
 
 import com.mvp.investservice.service.impl.StockServiceImpl;
+import com.mvp.investservice.util.SectorStockUtil;
 import com.mvp.investservice.web.dto.BrandLogoDto;
 import com.mvp.investservice.web.dto.stock.StockDto;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class StockMapper {
         stockDto.setTicker(stock.getTicker());
         stockDto.setCountryOfRiskName(stock.getCountryOfRiskName());
         stockDto.setCurrency(stock.getCurrency());
-        stockDto.setSector(stock.getSector());
+        stockDto.setSector(SectorStockUtil.valueOfRussianName(stock.getSector()));
         stockDto.setLots((int) stock.getLot());
 
         if (lastPrice != null) {
