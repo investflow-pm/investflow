@@ -62,7 +62,7 @@ public class BondServiceImpl implements BondService {
             bonds.add(investApi.getInstrumentsService().getBondByFigiSync(figi));
         }
 
-        return bondMapper.toDto(bonds);
+        return bondMapper.toDto(bonds, getLastPrices(bondFigis));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class BondServiceImpl implements BondService {
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
-            bonds.add(bondMapper.toDto(bond));
+            bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
         }
 
         return bonds;
@@ -104,7 +104,7 @@ public class BondServiceImpl implements BondService {
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : bondsBySector) {
-            bonds.add(bondMapper.toDto(bond));
+            bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
         }
 
         return bonds;
@@ -246,6 +246,24 @@ public class BondServiceImpl implements BondService {
         return couponsDto;
     }
 
+    public BigDecimal getLastPrice(String figi) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(List.of(figi)).get(0).getPrice();
+
+        return convertToBigDecimal(lastPrice).multiply(BigDecimal.valueOf(10)); // ????
+    }
+
+    public List<BigDecimal> getLastPrices(List<String> figis) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(figis);
+
+        List<BigDecimal> lastPriceDecimal = new ArrayList<>(lastPrice.size());
+
+        for (var i : lastPrice) {
+            lastPriceDecimal.add(convertToBigDecimal(i.getPrice()).multiply(BigDecimal.valueOf(10)));
+        }
+
+        return lastPriceDecimal;
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
      * @param bond - акция, которая будет куплена пользователем
@@ -253,7 +271,7 @@ public class BondServiceImpl implements BondService {
      * @return
      */
     private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(bond);
+        BondDto bondDto = bondMapper.toDto(bond, null);
 
         return setOrderResponseFields(postOrderResponse, bondDto);
     }
