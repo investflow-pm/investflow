@@ -16,7 +16,9 @@
 		<module>invest-service</module>
 		<module>crud-microservice</module>
 		<module>tg-bot</module>
-<!--		<module>report-service</module>-->
+		<module>eureka-server</module>
+		<module>api-gateway</module>
+		<module>report-service</module>
 	</modules>
 
     <properties>
@@ -25,6 +27,7 @@
 		<jakarta-validation.version>3.0.2</jakarta-validation.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<postgresql.version>42.6.0</postgresql.version>
+		<spring-cloud.version>2023.0.0</spring-cloud.version>
 	</properties>
 
 	<groupId>ru.tinkoff-pm</groupId>
@@ -94,7 +97,24 @@
 			<version>2.4.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<pluginManagement>

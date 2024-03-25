@@ -16,7 +16,7 @@
     <name>crud-microservice</name>
     <description>crud-microservice</description>
 
-<!--    <dependencies>-->
+    <!--    <dependencies>-->
 <!--        <dependency>-->
 <!--            <groupId>org.springframework.boot</groupId>-->
 <!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->

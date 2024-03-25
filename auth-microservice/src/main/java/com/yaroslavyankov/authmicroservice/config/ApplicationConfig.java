@@ -5,6 +5,7 @@ import com.yaroslavyankov.authmicroservice.web.security.JwtTokenFilter;
 import com.yaroslavyankov.authmicroservice.web.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,7 @@ public class ApplicationConfig {
     private final ApplicationContext applicationContext;
 
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplateBuilder()
                 .errorHandler(new RestTemplateErrorHandler())
@@ -71,7 +73,7 @@ public class ApplicationConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("api/v1/crud/**").permitAll()
+                        .requestMatchers("/api/v1/crud/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .anonymous(AbstractHttpConfigurer::disable)

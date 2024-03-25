@@ -29,20 +29,6 @@ public class AccountController {
                 .body(accountMapper.toDto(account));
     }
 
-//    @GetMapping("/{accountId}")
-//    public ResponseEntity getAccountById(@PathVariable String accountId) {
-//        try {
-//            Account account = accountService.getById(accountId);
-//            return ResponseEntity
-//                    .ok()
-//                    .body(accountMapper.toDto(account));
-//        } catch (ResourceNotFoundException exception) {
-//            return ResponseEntity
-//                    .status(HttpStatus.CONFLICT)
-//                    .header("error-message", exception.getMessage())
-//                    .body(exception.getMessage());
-//        }
-//    }
 
     @GetMapping("/{userId}")
     public ResponseEntity getAccountByUserId(@PathVariable Long userId) {
