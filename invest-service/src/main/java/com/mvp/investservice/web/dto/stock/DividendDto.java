@@ -1,17 +1,23 @@
 package com.mvp.investservice.web.dto.stock;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Schema(description = "Сущность дивиденда акции")
 @Data
 public class DividendDto {
-    private LocalDateTime date; // дата
+    @Schema(description = "Дата выплаты дивидендов")
+    private LocalDateTime date;
 
-    private BigDecimal paymentPerShare; // выплата на одну акцию
+    @Schema(description = "Величина дивиденда на 1 ценную бумагу")
+    private BigDecimal paymentPerShare;
 
-    private String currency; // валюта
+    @Schema(description = "Валюта дивиденда")
+    private String currency;
 
-    private BigDecimal interestIncome; // процентный доход
+    @Schema(description = "Процентный доход дивиденда")
+    private BigDecimal interestIncome;
 }
