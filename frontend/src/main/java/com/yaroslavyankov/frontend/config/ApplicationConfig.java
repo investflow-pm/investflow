@@ -1,6 +1,5 @@
 package com.yaroslavyankov.frontend.config;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,6 @@ public class ApplicationConfig {
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
-       return new RestTemplate();
+        return new RestTemplate();
     }
 }

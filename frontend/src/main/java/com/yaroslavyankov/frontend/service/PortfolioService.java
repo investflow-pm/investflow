@@ -4,6 +4,8 @@ package com.yaroslavyankov.frontend.service;
 import com.yaroslavyankov.frontend.dto.PortfolioRequest;
 import com.yaroslavyankov.frontend.dto.PortfolioResponse;
 import com.yaroslavyankov.frontend.props.InvestLinkProperties;
+import com.yaroslavyankov.frontend.service.exception.AccessDeniedException;
+import com.yaroslavyankov.frontend.service.exception.GettingProtfolioException;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 

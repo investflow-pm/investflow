@@ -43,7 +43,7 @@ public class MainView extends AppLayout {
 
         // Configure styling for the header
         layout.setId("header");
-        layout.getThemeList().set("dark", true);
+        layout.getThemeList().set("light", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -104,7 +104,8 @@ public class MainView extends AppLayout {
 
     private Component[] createMenuItems() {
         return new Tab[] { createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
-                    createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create())};
+                    createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
+                    createTab("Главная", HomeView.class, VaadinIcon.HOME.create()) };
     }
 
     private static Tab createTab(String text,
