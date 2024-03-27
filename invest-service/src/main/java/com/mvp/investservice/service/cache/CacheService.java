@@ -19,4 +19,8 @@ public class CacheService {
     public List<Share> getTradableStocksSync(InvestApi investApi) {
         return investApi.getInstrumentsService().getTradableSharesSync();
     }
+    @Cacheable("tradable-fond-cache")
+    public List<Share> getTradableFondsSync(InvestApi investApi) {
+        return investApi.getInstrumentsService().getTradableSharesSync();
+    }
 }

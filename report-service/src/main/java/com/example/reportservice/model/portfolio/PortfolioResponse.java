@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class PortfolioResponse {
-    private List<Portfolio> portfolios;
+    private List<Portfolio> portfolio;
 }
