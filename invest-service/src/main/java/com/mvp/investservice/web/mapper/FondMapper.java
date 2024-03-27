@@ -16,7 +16,6 @@ public class FondMapper {
         fondDto.setTicker(fond.getTicker());
         fondDto.setCountryOfRiskName(fond.getCountryOfRiskName());
         fondDto.setCurrency(fond.getCurrency());
-        fondDto.setSector(fond.getSector());
         fondDto.setLots((int) fond.getLot());
 
         return fondDto;
@@ -33,7 +32,6 @@ public class FondMapper {
             fondDto.setTicker(fond.getTicker());
             fondDto.setCountryOfRiskName(fond.getCountryOfRiskName());
             fondDto.setCurrency(fond.getCurrency());
-            fondDto.setSector(fond.getSector());
             fondDto.setLots((int) fond.getLot());
 
             fondDtoList.add(fondDto);
