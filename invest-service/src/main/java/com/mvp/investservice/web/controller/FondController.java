@@ -4,7 +4,6 @@ import com.mvp.investservice.service.FondService;
 import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.fond.FondDto;
-import com.mvp.investservice.web.dto.stock.StockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +25,12 @@ public class FondController {
         return fondService.getFonds(page, count);
     }
 
-
     @PostMapping("/buy")
     public OrderResponse<FondDto> buyFond(@RequestBody PurchaseDto purchaseDto) {
         return fondService.buyFond(purchaseDto);
+    }
+    @PostMapping("/buy")
+    public OrderResponse<FondDto> sellFond(@RequestBody PurchaseDto purchaseDto) {
+        return fondService.sellFond(purchaseDto);
     }
 }

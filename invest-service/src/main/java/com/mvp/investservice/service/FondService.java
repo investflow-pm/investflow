@@ -13,4 +13,5 @@ public interface FondService {
     List<FondDto> getFonds(Integer page, Integer count);
 
     OrderResponse<FondDto> buyFond (PurchaseDto purchaseDto);
+    OrderResponse<FondDto> sellFond (PurchaseDto purchaseDto);
 }

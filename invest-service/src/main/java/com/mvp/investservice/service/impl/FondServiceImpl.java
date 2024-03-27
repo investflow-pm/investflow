@@ -3,6 +3,7 @@ package com.mvp.investservice.service.impl;
 import com.mvp.investservice.domain.exception.AssetNotFoundException;
 import com.mvp.investservice.domain.exception.BuyUnavailableException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.SellUnavailableException;
 import com.mvp.investservice.service.FondService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
@@ -123,7 +124,34 @@ public class FondServiceImpl implements FondService {
             throw new BuyUnavailableException("В данный момент невозможно купить данную облигацию");
         }
     }
+    @Override
+    public OrderResponse<FondDto> sellFond(PurchaseDto purchaseDto) {
+        Share purchasedFond = null;
+        try {
+            purchasedFond = investApi.getInstrumentsService()
+                    .getShareByFigiSync(purchasedFond.getFigi());
+        } catch (Exception e) {
+            throw new AssetNotFoundException(e.getMessage());
+        }
 
+        if (purchasedFond.getBuyAvailableFlag() && purchasedFond.getApiTradeAvailableFlag()) {
+            var figi = purchasedFond.getFigi();
+            var price = getBigDecimalPrice(figi);
+            var resultPrice = getPurchasePrice(price);
+            try {
+                var postOrderResponse = investApi.getOrdersService()
+                        .postOrderSync(figi, purchaseDto.getLot(), resultPrice, OrderDirection.ORDER_DIRECTION_SELL,
+                                purchaseDto.getAccountId(), OrderType.valueOf(purchaseDto.getOrderType().name()),
+                                UUID.randomUUID().toString());
+
+                return generateOrderResponse(purchasedFond, postOrderResponse);
+            } catch (Exception e) {
+                throw new SellUnavailableException(e.getMessage());
+            }
+        } else {
+            throw new SellUnavailableException("В данный момент невозможно купить данную облигацию");
+        }
+    }
     /**
      * Метод по генерации ответа по покупке акции
      * @param purchasedFond - акция, которая будет куплена пользователем
