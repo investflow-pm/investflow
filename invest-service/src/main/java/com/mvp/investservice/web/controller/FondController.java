@@ -29,7 +29,7 @@ public class FondController {
     public OrderResponse<FondDto> buyFond(@RequestBody PurchaseDto purchaseDto) {
         return fondService.buyFond(purchaseDto);
     }
-    @PostMapping("/buy")
+    @PostMapping("/sell")
     public OrderResponse<FondDto> sellFond(@RequestBody PurchaseDto purchaseDto) {
         return fondService.sellFond(purchaseDto);
     }
