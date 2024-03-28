@@ -13,6 +13,9 @@ import com.mvp.crudmicroservice.user.web.dto.user.AccountDto;
 import com.mvp.crudmicroservice.user.web.dto.user.UserDto;
 import com.mvp.crudmicroservice.user.web.mapper.AccountMapper;
 import com.mvp.crudmicroservice.user.web.mapper.UserMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/crud/users")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name="UserController", description="Работа с аккаунтом в пользователя")
 public class UserController {
 
     private final UserService userService;
@@ -33,8 +37,12 @@ public class UserController {
 
     private final AccountMapper accountMapper;
 
+    @Operation(
+            summary = "Создание пользователя",
+            description = "Создает аккаунт пользователя в системе"
+    )
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> createUser(@Parameter(description = "Сущность пользователя") @RequestBody UserDto userDto) {
         try {
             User user = userMapper.toEntity(userDto);
             User createdUser = userService.create(user);
@@ -45,8 +53,12 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Получение пользователя???",
+            description = "Получает сущность пользователя???"
+    )
     @PostMapping("/login")
-    public ResponseEntity<UserDto> getUser(@RequestBody JwtRequest jwtRequest) {
+    public ResponseEntity<UserDto> getUser(@Parameter(description = "???") @RequestBody JwtRequest jwtRequest) {
         try {
             User user = userService.getByUsername(jwtRequest.getUsername());
             return ResponseEntity.ok().body(userMapper.toDto(user));
@@ -55,8 +67,12 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Создание акаунта в API???",
+            description = "Создает аккаунт в API инвестиций???"
+    )
     @PostMapping("/accounts")
-    public ResponseEntity createAccount(@RequestBody AccountDto accountDto) {
+    public ResponseEntity createAccount(@Parameter(description = "???") @RequestBody AccountDto accountDto) {
         try {
             Account account = accountMapper.toEntity(accountDto);
             Account createdAccount = accountService.create(account);
@@ -70,8 +86,12 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Обновление аккаунта пользователя",
+            description = "Обновляет информацию о конкретном пользователе"
+    )
     @PutMapping
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(@Parameter(description = "Сущность пользователя") @RequestBody UserDto userDto) {
         User user = userMapper.toEntity(userDto);
         User updatedUser = userService.update(user);
         if (updatedUser != null) {
@@ -81,8 +101,12 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Получение аккаунта по ID инвестиций",
+            description = "Получает полную информацию об аккаунте пользователя"
+    )
     @GetMapping("/{userId}")
-    public ResponseEntity getUserById(@PathVariable Long userId) {
+    public ResponseEntity getUserById(@Parameter(description = "ID пользователя") @PathVariable Long userId) {
         try {
             User user = userService.getById(userId);
             return ResponseEntity.ok().body(userMapper.toDto(user));
@@ -94,8 +118,12 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Получение пользователя по username/e-mail",
+            description = "Получает информацию о пользователе"
+    )
     @GetMapping
-    public ResponseEntity<UserDto> getUserByUsername(@RequestParam(value = "username") String username) {
+    public ResponseEntity<UserDto> getUserByUsername(@Parameter(description = "username/e-mail") @RequestParam(value = "username") String username) {
         try {
             User user = userService.getByUsername(username);
             return ResponseEntity.ok().body(userMapper.toDto(user));
@@ -104,8 +132,13 @@ public class UserController {
         }
     }
 
+    // TODO: удалять плюсом акк инвестиций???
+    @Operation(
+            summary = "Удаляет аккаунт пользователя по ID",
+            description = "Получает информацию о пользователе"
+    )
     @DeleteMapping("/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<String> deleteUser(@Parameter(description = "ID пользователя") @PathVariable Long userId) {
         userService.delete(userId);
         return ResponseEntity.ok().body("Пользователь успешно удалён");
     }
