@@ -6,6 +6,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -18,11 +19,13 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.yaroslavyankov.frontend.view.home.HomeView;
 
 import java.util.Optional;
 
 @PageTitle("Workspace | InvestFlow")
 @Route("workspace")
+@CssImport("./styles/style.css")
 public class MainView extends AppLayout {
 
     private final Tabs menu;
@@ -103,9 +106,11 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[] { createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
-                    createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
-                    createTab("Главная", HomeView.class, VaadinIcon.HOME.create()) };
+        return new Tab[]{
+                createTab("Главная", HomeView.class, VaadinIcon.HOME.create()),
+                createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
+                createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
+        };
     }
 
     private static Tab createTab(String text,
