@@ -82,17 +82,21 @@ services:
     image: frontend
     ports:
       - "9100:9100"
+    links:
+      - api-gateway
     networks:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
       - REGISTER_USER_LINK=http://api-gateway:9102/api/v1/auth/register
       - LOGIN_USER_LINK=http://api-gateway:9102/api/v1/auth/login
+      - PORTFOLIO_LINK=http://api-gateway:9102/api/v1/invest/portfolios
       - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - invest-service
       - eureka-service
       - auth-microservice
+      - api-gateway
 
   api-gateway:
     build:

@@ -25,7 +25,7 @@ import java.util.Optional;
 
 @PageTitle("Workspace | InvestFlow")
 @Route("workspace")
-@CssImport("./styles/style.css")
+@CssImport("../styles/style.css")
 public class MainView extends AppLayout {
 
     private final Tabs menu;
