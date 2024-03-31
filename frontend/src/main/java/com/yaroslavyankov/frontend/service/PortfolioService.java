@@ -4,10 +4,12 @@ package com.yaroslavyankov.frontend.service;
 import com.yaroslavyankov.frontend.dto.PortfolioRequest;
 import com.yaroslavyankov.frontend.dto.PortfolioResponse;
 import com.yaroslavyankov.frontend.props.InvestLinkProperties;
-import com.yaroslavyankov.frontend.service.exception.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,7 +34,7 @@ public class PortfolioService {
 
 
         ResponseEntity<PortfolioResponse> response = restTemplate
-                    .exchange(investLinkProperties.getPortfolioLink(), HttpMethod.POST, request, PortfolioResponse.class);
+                .exchange(investLinkProperties.getPortfolioLink(), HttpMethod.POST, request, PortfolioResponse.class);
 
         return response.getBody();
     }
