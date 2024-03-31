@@ -34,4 +34,4 @@ build/
 
 ### Vaadin Flow ###
 frontend/frontend/*
-!frontend/frontend/styles/*
+!frontend/frontend/styles

@@ -22,7 +22,7 @@ import java.util.List;
 
 @Route(value = "home", layout = MainView.class)
 @PageTitle("Главная")
-@RouteAlias(value = "", layout = MainView.class)
+@RouteAlias(value = "/workspace/home", layout = MainView.class)
 public class HomeView extends VerticalLayout {
 
     public HomeView(@Autowired PortfolioService portfolioService) {
