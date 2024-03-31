@@ -33,4 +33,5 @@ build/
 .vscode/
 
 ### Vaadin Flow ###
-frontend/frontend/
+frontend/frontend/*
+!frontend/frontend/styles/*

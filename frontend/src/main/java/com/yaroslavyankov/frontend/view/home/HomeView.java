@@ -6,16 +6,21 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.yaroslavyankov.frontend.dto.Asset;
 import com.yaroslavyankov.frontend.dto.PortfolioResponse;
+import com.yaroslavyankov.frontend.dto.PositionResponse;
 import com.yaroslavyankov.frontend.service.PortfolioService;
 import com.yaroslavyankov.frontend.service.exception.AccessDeniedException;
 import com.yaroslavyankov.frontend.service.exception.GettingProtfolioException;
+import com.yaroslavyankov.frontend.util.SectorCounter;
 import com.yaroslavyankov.frontend.view.GridLayout;
 import com.yaroslavyankov.frontend.view.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
 
 @Route(value = "home", layout = MainView.class)
 @PageTitle("Главная")
@@ -31,10 +36,10 @@ public class HomeView extends VerticalLayout {
         setSpacing(false);
 
         try {
-            PortfolioResponse portfolio = portfolioService.getPortfolio("4a0edb00-16cb-4272-86ee-6cd746198803", accessToken);
+            PortfolioResponse portfolio = portfolioService.getPortfolio("a7c911bb-5b01-41bf-9db7-3767ac46385d", accessToken);
 
             PortfolioWidget portfolioWidget = getPortfolioWidget(portfolio);
-            InfoWidget widget2 = new InfoWidget("Widget 2");
+            SectorChartWidget sectorChartWidget = getSectorChartWidget(portfolio);
             InfoWidget widget3 = new InfoWidget("Widget 3");
             InfoWidget widget4 = new InfoWidget("Widget 4");
 
@@ -43,8 +48,8 @@ public class HomeView extends VerticalLayout {
             gridLayout.setSizeFull();
 
             gridLayout.add(portfolioWidget);
-            gridLayout.add(widget2);
             gridLayout.add(widget3);
+            gridLayout.add(sectorChartWidget);
             gridLayout.add(widget4);
 
             // Add grid layout to the view
@@ -71,4 +76,16 @@ public class HomeView extends VerticalLayout {
 
         return new PortfolioWidget("Ваш счёт", body);
     }
+
+    private SectorChartWidget getSectorChartWidget(PortfolioResponse portfolioResponse) {
+        List<PositionResponse> positions = portfolioResponse.getPositions();
+        List<Asset> assets = positions.stream()
+                .map(PositionResponse::getAsset).toList();
+
+        Map<String, Long> sectorMap = SectorCounter.countSectors(assets, Asset::getSector);
+
+        return new SectorChartWidget("Аналитика", sectorMap);
+    }
+
+
 }

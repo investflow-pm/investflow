@@ -6,7 +6,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -25,7 +27,8 @@ import java.util.Optional;
 
 @PageTitle("Workspace | InvestFlow")
 @Route("workspace")
-@CssImport("../styles/style.css")
+@CssImport("./styles/style.css")
+@Uses(Chart.class)
 public class MainView extends AppLayout {
 
     private final Tabs menu;

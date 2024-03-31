@@ -14,6 +14,9 @@ auth:
 invest:
   portfolioLink: ${PORTFOLIO_LINK}
 
+vaadin:
+  productionMode: true
+
 eureka:
   client:
     service-url:

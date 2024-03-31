@@ -7,6 +7,8 @@ RUN mvn -N install
 
 COPY /frontend/. .
 
+RUN mvn vaadin:build-frontend
+
 RUN mvn install -DskipTests
 
 FROM openjdk:17-slim
