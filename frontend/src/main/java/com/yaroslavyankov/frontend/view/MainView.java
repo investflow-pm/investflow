@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.yaroslavyankov.frontend.view.home.HomeView;
+import com.yaroslavyankov.frontend.view.stock.StocksInfoView;
 
 import java.util.Optional;
 
@@ -29,6 +31,7 @@ import java.util.Optional;
 @Route("workspace")
 @CssImport("./styles/style.css")
 @Uses(Chart.class)
+@Uses(Grid.class)
 public class MainView extends AppLayout {
 
     private final Tabs menu;
@@ -113,6 +116,7 @@ public class MainView extends AppLayout {
                 createTab("Главная", HomeView.class, VaadinIcon.HOME.create()),
                 createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
                 createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
+                createTab("Акции", StocksInfoView.class, VaadinIcon.CASH.create())
         };
     }
 

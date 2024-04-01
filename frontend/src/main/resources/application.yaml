@@ -17,6 +17,9 @@ invest:
 vaadin:
   productionMode: true
 
+stock:
+  allStocksLink: ${ALL_STOCKS_LINK}
+
 eureka:
   client:
     service-url:
