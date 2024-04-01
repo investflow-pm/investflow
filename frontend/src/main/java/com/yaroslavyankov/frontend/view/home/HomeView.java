@@ -64,43 +64,8 @@ public class HomeView extends VerticalLayout implements BeforeEnterObserver {
         }
     }
 
-    public HomeView(@Autowired PortfolioService portfolioService, PortfolioService portfolioService1) {
-
-//        String accessToken = (String) VaadinSession.getCurrent().getAttribute("accessToken");
-//
-//        // Configure layout
-//        setSizeFull();
-//        setMargin(false);
-//        setSpacing(false);
-//
-//        try {
-//            PortfolioResponse portfolio = portfolioService.getPortfolio("a7c911bb-5b01-41bf-9db7-3767ac46385d", accessToken);
-//
-//            PortfolioWidget portfolioWidget = getPortfolioWidget(portfolio);
-//            AnalyticsWidget analyticsWidget = getSectorChartWidget(portfolio);
-//            InfoWidget widget3 = new InfoWidget("Widget 3");
-//            InfoWidget widget4 = new InfoWidget("Widget 4");
-//
-//            // Configure grid layout
-//            GridLayout gridLayout = new GridLayout();
-//            gridLayout.setSizeFull();
-//
-//            gridLayout.add(portfolioWidget);
-//            gridLayout.add(widget3);
-//            gridLayout.add(analyticsWidget);
-//            gridLayout.add(widget4);
-//
-//            // Add grid layout to the view
-//            add(gridLayout);
-//
-//        } catch (HttpClientErrorException.Unauthorized e) {
-//            UI.getCurrent().navigate(LoginView.class);
-//        } catch (GettingProtfolioException e) {
-//            H2 exceptionTitle = new H2("Не удалось получить портфель по счёту");
-//            exceptionTitle.getStyle()
-//                    .set("margin", "0 auto");
-//        }
-        this.portfolioService = portfolioService1;
+    public HomeView(@Autowired PortfolioService portfolioService) {
+        this.portfolioService = portfolioService;
     }
 
     private PortfolioWidget getPortfolioWidget(PortfolioResponse portfolio) {
