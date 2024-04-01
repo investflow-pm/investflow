@@ -3,7 +3,6 @@ package com.mvp.investservice.service.impl;
 import com.mvp.investservice.domain.exception.CannotProceedApiRequestException;
 import com.mvp.investservice.domain.exception.ResourceNotFoundException;
 import com.mvp.investservice.service.PortfolioService;
-import com.mvp.investservice.util.MoneyParser;
 import com.mvp.investservice.web.dto.Asset;
 import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
 import com.mvp.investservice.web.dto.portfolio.PortfolioResponse;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.Bond;
 import ru.tinkoff.piapi.contract.v1.Currency;
-import ru.tinkoff.piapi.contract.v1.MoneyValue;
 import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.core.InvestApi;
 import ru.tinkoff.piapi.core.models.Money;
@@ -27,7 +25,6 @@ import ru.tinkoff.piapi.core.models.WithdrawLimits;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -120,12 +117,12 @@ public class PortfolioServiceImpl implements PortfolioService {
             case "share" -> {
                 Share share = investApi.getInstrumentsService()
                         .getShareByFigiSync(position.getFigi());
-                asset = stockMapper.toDto(share);
+                asset = stockMapper.toDto(share, null); // TODO: change?
             }
             case "bond" -> {
                 Bond bond = investApi.getInstrumentsService()
                         .getBondByFigiSync(position.getFigi());
-                asset = bondMapper.toDto(bond);
+                asset = bondMapper.toDto(bond, null); // TODO: change?
             }
             case "currency" -> {
                 Currency currency = investApi.getInstrumentsService()

@@ -34,23 +34,23 @@ public enum SectorStockUtil{
         return russianName;
     }
 
-    public static String valueOfRussianName(String russianName) {
+    public static String valueOfEnglishName(String russianName) {
         for (var name : values()) {
             if (name.russianName.equalsIgnoreCase(russianName)) {
                 return name.englishName;
             }
         }
 
-        return null;
+        return russianName;
     }
 
-    public static String valueOfEnglishName(String englishName) {
+    public static String valueOfRussianName(String englishName) {
         for (var name : values()) {
             if (name.englishName.equalsIgnoreCase(englishName)) {
                 return name.russianName;
             }
         }
 
-        return null;
+        return englishName;
     }
 }

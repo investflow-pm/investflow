@@ -20,7 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Route("login")
-@PageTitle("Login | Investflow")
+@PageTitle("Login | InvestFlow")
 public class LoginView extends VerticalLayout {
 
     private final RestTemplate restTemplate;
@@ -37,7 +37,7 @@ public class LoginView extends VerticalLayout {
         this.restTemplate = restTemplate;
         this.authLinkProperties = authLinkProperties;
 
-        H1 appName = new H1("Investflow");
+        H1 appName = new H1("InvestFlow");
         H2 loginHeader = new H2("Login");
         TextField usernameField = new TextField("Username");
         PasswordField passwordField = new PasswordField("Password");
@@ -57,7 +57,7 @@ public class LoginView extends VerticalLayout {
                     VaadinSession.getCurrent().setAttribute("refreshToken", response.getRefreshToken());
                 }
 
-                UI.getCurrent().navigate("/profile");
+                UI.getCurrent().navigate("/workspace");
             } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
                     Notification.show("Некорреектный username или пароль", 3000, Notification.Position.MIDDLE);

@@ -19,7 +19,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Route("register")
-@PageTitle("Register | Investflow")
+@PageTitle("Register | InvestFlow")
 public class RegisterView extends VerticalLayout {
 
     private final RestTemplate restTemplate;
@@ -35,7 +35,7 @@ public class RegisterView extends VerticalLayout {
         this.restTemplate = restTemplate;
         this.authLinkProperties = authLinkProperties;
 
-        H1 appName = new H1("Investflow");
+        H1 appName = new H1("InvestFlow");
         H2 registerHeader = new H2("Регистрация");
         TextField nameField = new TextField("Имя");
         TextField usernameField = new TextField("Username");

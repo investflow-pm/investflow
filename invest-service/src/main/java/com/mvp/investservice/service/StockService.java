@@ -4,6 +4,7 @@ import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.stock.DividendDto;
+import com.mvp.investservice.web.dto.stock.DividendResponse;
 import com.mvp.investservice.web.dto.stock.StockDto;
 
 import java.util.List;
@@ -20,5 +21,5 @@ public interface StockService {
 
     OrderResponse<StockDto> saleStock(SaleDto saleDto);
 
-    List<DividendDto> getDividends(String figi);
+    DividendResponse getDividends(String figi);
 }

@@ -1,9 +1,6 @@
 package com.mvp.investservice.service.impl;
 
-import com.mvp.investservice.domain.exception.AssetNotFoundException;
-import com.mvp.investservice.domain.exception.BuyUnavailableException;
-import com.mvp.investservice.domain.exception.InsufficientFundsException;
-import com.mvp.investservice.domain.exception.ResourceNotFoundException;
+import com.mvp.investservice.domain.exception.*;
 import com.mvp.investservice.service.BondService;
 import com.mvp.investservice.service.cache.CacheService;
 import com.mvp.investservice.util.MoneyParser;
@@ -12,7 +9,10 @@ import com.mvp.investservice.web.dto.OrderResponse;
 import com.mvp.investservice.web.dto.PurchaseDto;
 import com.mvp.investservice.web.dto.SaleDto;
 import com.mvp.investservice.web.dto.bond.BondDto;
+import com.mvp.investservice.web.dto.bond.CouponDto;
+import com.mvp.investservice.web.dto.bond.CouponResponse;
 import com.mvp.investservice.web.dto.portfolio.PortfolioRequest;
+import com.mvp.investservice.web.dto.stock.DividendDto;
 import com.mvp.investservice.web.mapper.BondMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,15 +20,22 @@ import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.core.InvestApi;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class BondServiceImpl implements BondService {
-
     private final CacheService cacheService;
+
     private final InvestApi investApi;
     private final BondMapper bondMapper;
     private final PortfolioServiceImpl portfolioService;
@@ -55,7 +62,7 @@ public class BondServiceImpl implements BondService {
             bonds.add(investApi.getInstrumentsService().getBondByFigiSync(figi));
         }
 
-        return bondMapper.toDto(bonds);
+        return bondMapper.toDto(bonds, getLastPrices(bondFigis));
     }
 
     @Override
@@ -67,11 +74,11 @@ public class BondServiceImpl implements BondService {
             count = 10;
         }
 
-        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count - 1);
+        var tradableBonds = cacheService.getTradableBondsSync(investApi).subList((page - 1) * count, count);
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
-            bonds.add(bondMapper.toDto(bond));
+            bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
         }
 
         return bonds;
@@ -88,7 +95,7 @@ public class BondServiceImpl implements BondService {
 
         List<Bond> bondsBySector = new ArrayList<>();
 
-        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() <= count; i++) {
+        for (var i = 0; i < tradableBonds.size() && bondsBySector.size() < count; i++) {
             var bond = tradableBonds.get(i);
             if (bond.getSector().equalsIgnoreCase(sector)) {
                 bondsBySector.add(bond);
@@ -97,7 +104,7 @@ public class BondServiceImpl implements BondService {
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : bondsBySector) {
-            bonds.add(bondMapper.toDto(bond));
+            bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
         }
 
         return bonds;
@@ -180,6 +187,83 @@ public class BondServiceImpl implements BondService {
         }
     }
 
+    @Override
+    public CouponResponse getCoupons(String figi) {
+        if (investApi.getInstrumentsService().findInstrumentSync(figi)
+                .stream().filter(s -> s.getInstrumentType().equalsIgnoreCase("bond")
+                        && s.getFigi().equalsIgnoreCase(figi)).toList().isEmpty()) {
+            throw new AssetNotFoundException("Облигация не найдена");
+        }
+
+        var bond = investApi.getInstrumentsService().getBondByFigiSync(figi);
+
+        var couponsAscDateAll = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
+                Instant.ofEpochSecond(9_000_000_000L));
+
+        if (couponsAscDateAll.isEmpty()) {
+            throw new YieldNotFoundException("Купоны по облигации отстуствуют");
+        }
+
+        var currentCouponsCount = investApi.getInstrumentsService().getBondCouponsSync(figi, Instant.ofEpochSecond(0),
+                Instant.now()).stream().count();
+
+        var couponsDescDate = new ArrayList<>(couponsAscDateAll);
+        Collections.reverse(couponsDescDate);
+
+        var nextPaymentDate = LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(couponsAscDateAll.get((int)currentCouponsCount)
+                        .getCouponDate().getSeconds()), ZoneId.systemDefault());
+
+        return new CouponResponse(figi,
+                nextPaymentDate,
+                currentCouponsCount,
+                couponsDescDate.stream().count(),
+                generateCouponsDto(couponsDescDate, currentCouponsCount, bond));
+    }
+
+    private List<CouponDto> generateCouponsDto(List<Coupon> coupons, Long countCouponsNow, Bond bond) {
+        var couponsDto = new ArrayList<CouponDto>();
+
+        for (var coupon : coupons) {
+            var couponDto = new CouponDto();
+
+            couponDto.setCouponDate(LocalDateTime.ofInstant(Instant.ofEpochSecond(coupon.getCouponDate().getSeconds()),
+                    ZoneId.systemDefault()));
+            couponDto.setAccumulatedCouponIncome(convertToBigDecimal(bond.getAciValue()));
+            couponDto.setCouponNumber(coupon.getCouponNumber());
+            couponDto.setPayment(convertToBigDecimal(coupon.getPayOneBond()));
+            couponDto.setCurrency(coupon.getPayOneBond().getCurrency());
+
+            var percent = convertToBigDecimal(coupon.getPayOneBond())
+                            .multiply(BigDecimal.valueOf(bond.getCouponQuantityPerYear())
+                            .multiply(BigDecimal.valueOf(100)))
+                    .divide(convertToBigDecimal(bond.getNominal()));
+            couponDto.setInterestIncome(percent);
+
+            couponsDto.add(couponDto);
+        }
+
+        return couponsDto;
+    }
+
+    public BigDecimal getLastPrice(String figi) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(List.of(figi)).get(0).getPrice();
+
+        return convertToBigDecimal(lastPrice).multiply(BigDecimal.valueOf(10)); // ????
+    }
+
+    public List<BigDecimal> getLastPrices(List<String> figis) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(figis);
+
+        List<BigDecimal> lastPriceDecimal = new ArrayList<>(lastPrice.size());
+
+        for (var i : lastPrice) {
+            lastPriceDecimal.add(convertToBigDecimal(i.getPrice()).multiply(BigDecimal.valueOf(10)));
+        }
+
+        return lastPriceDecimal;
+    }
+
     /**
      * Метод по генерации ответа по покупке акции
      * @param bond - акция, которая будет куплена пользователем
@@ -187,7 +271,7 @@ public class BondServiceImpl implements BondService {
      * @return
      */
     private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(bond);
+        BondDto bondDto = bondMapper.toDto(bond, null);
 
         return setOrderResponseFields(postOrderResponse, bondDto);
     }
