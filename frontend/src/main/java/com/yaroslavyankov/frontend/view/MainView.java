@@ -22,6 +22,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.yaroslavyankov.frontend.view.bond.BondInfoView;
 import com.yaroslavyankov.frontend.view.home.HomeView;
 import com.yaroslavyankov.frontend.view.stock.StocksInfoView;
 
@@ -116,7 +117,8 @@ public class MainView extends AppLayout {
                 createTab("Главная", HomeView.class, VaadinIcon.HOME.create()),
                 createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
                 createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
-                createTab("Акции", StocksInfoView.class, VaadinIcon.CASH.create())
+                createTab("Акции", StocksInfoView.class, VaadinIcon.CASH.create()),
+                createTab("Облигации", BondInfoView.class, VaadinIcon.SCALE.create())
         };
     }
 

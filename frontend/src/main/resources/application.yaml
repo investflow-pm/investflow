@@ -20,6 +20,9 @@ vaadin:
 stock:
   allStocksLink: ${ALL_STOCKS_LINK}
 
+bond:
+  allBondsLink: ${All_BOND_LINK}
+
 eureka:
   client:
     service-url:
