@@ -61,7 +61,7 @@ services:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
-      - TOKEN=t.VqnElEfrPsAXQfuhO8JgcnOUhpz9dI3dNq6yFntZaSuRtU7eKgBNusIpTIifs14jsPfI5hRl47JXsByKqWGMFg
+      - TOKEN=t.QdbrDg8e29zxx5P-iHDueTXfbGnToWilLmNWz3iktnebGEsmcVihX7BxTVoA-V5x3X5xGHlj396DUUVRC2pF7A
       - USER_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/users
       - CREATE_ACCOUNT_LINK=http://crud-microservice:9097/api/v1/crud/users/accounts
       - ACCOUNT_SERVICE_LINK=http://crud-microservice:9097/api/v1/crud/accounts
