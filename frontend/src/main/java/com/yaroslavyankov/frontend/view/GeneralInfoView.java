@@ -62,7 +62,7 @@ public class GeneralInfoView extends VerticalLayout {
         PortfolioResponse portfolio;
         try {
             portfolio
-                    = getPortfolio("4a0edb00-16cb-4272-86ee-6cd746198803", accessToken);
+                    = getPortfolio("a7c911bb-5b01-41bf-9db7-3767ac46385d", accessToken);
             int sharesCount = getSharesCount(portfolio);
             int bondCount = getBondsCount(portfolio);
 
