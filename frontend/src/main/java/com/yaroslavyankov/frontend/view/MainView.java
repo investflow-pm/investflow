@@ -117,6 +117,7 @@ public class MainView extends AppLayout {
                 createTab("Главная", HomeView.class, VaadinIcon.HOME.create()),
                 createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
                 createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
+                createTab("Операции", OperationView.class, VaadinIcon.BOOK.create()),
                 createTab("", HomeView.class, VaadinIcon.LINE_H.create()),
                 createTab("Акции", StocksInfoView.class, VaadinIcon.CASH.create()),
                 createTab("Облигации", BondInfoView.class, VaadinIcon.SCALE.create())

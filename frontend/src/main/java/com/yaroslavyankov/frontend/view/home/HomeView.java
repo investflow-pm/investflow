@@ -5,8 +5,11 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import com.yaroslavyankov.frontend.dto.Operation;
+import com.yaroslavyankov.frontend.dto.OperationResponse;
 import com.yaroslavyankov.frontend.dto.PortfolioResponse;
 import com.yaroslavyankov.frontend.dto.PositionResponse;
+import com.yaroslavyankov.frontend.service.OperationService;
 import com.yaroslavyankov.frontend.service.PortfolioService;
 import com.yaroslavyankov.frontend.service.exception.GettingProtfolioException;
 import com.yaroslavyankov.frontend.view.GridLayout;
@@ -25,6 +28,8 @@ import java.util.List;
 public class HomeView extends VerticalLayout implements BeforeEnterObserver {
     private final PortfolioService portfolioService;
 
+    private final OperationService operationService;
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         String accessToken = (String) VaadinSession.getCurrent().getAttribute("accessToken");
@@ -36,20 +41,24 @@ public class HomeView extends VerticalLayout implements BeforeEnterObserver {
 
         try {
             PortfolioResponse portfolio = portfolioService.getPortfolio("a7c911bb-5b01-41bf-9db7-3767ac46385d", accessToken);
+            OperationResponse operationResponse = operationService.getOperations("a7c911bb-5b01-41bf-9db7-3767ac46385d", accessToken);
+
+
 
             PortfolioWidget portfolioWidget = getPortfolioWidget(portfolio);
             AnalyticsWidget analyticsWidget = getSectorChartWidget(portfolio);
-            InfoWidget widget3 = new InfoWidget("Widget 3");
-            InfoWidget widget4 = new InfoWidget("Widget 4");
+            OperationWidget operationWidget = getOperationWidget(operationResponse);
+            ImageWidget imageWidget = new ImageWidget("...");
 
+            InfoWidget infoWidget = new InfoWidget("In progress...");
             // Configure grid layout
             GridLayout gridLayout = new GridLayout();
             gridLayout.setSizeFull();
 
             gridLayout.add(portfolioWidget);
-            gridLayout.add(widget3);
+            gridLayout.add(operationWidget);
             gridLayout.add(analyticsWidget);
-            gridLayout.add(widget4);
+            gridLayout.add(infoWidget);
 
             // Add grid layout to the view
             add(gridLayout);
@@ -64,8 +73,9 @@ public class HomeView extends VerticalLayout implements BeforeEnterObserver {
         }
     }
 
-    public HomeView(@Autowired PortfolioService portfolioService) {
+    public HomeView(@Autowired PortfolioService portfolioService, @Autowired OperationService operationService) {
         this.portfolioService = portfolioService;
+        this.operationService = operationService;
     }
 
     private PortfolioWidget getPortfolioWidget(PortfolioResponse portfolio) {
@@ -79,6 +89,12 @@ public class HomeView extends VerticalLayout implements BeforeEnterObserver {
         body.setPositionCount(positionCount);
 
         return new PortfolioWidget("Ваш счёт", body);
+    }
+
+    private OperationWidget getOperationWidget(OperationResponse operationResponse) {
+        List<Operation> operations = operationResponse.getOperations();
+
+        return new OperationWidget("Операции", operations);
     }
 
     private AnalyticsWidget getSectorChartWidget(PortfolioResponse portfolioResponse) {

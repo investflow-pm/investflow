@@ -6,7 +6,7 @@ body {
 .grid-layout {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Two equal-width columns */
-    grid-template-rows: 1fr 1fr; /* Two equal-height rows */
+    grid-template-rows: .2fr 1fr; /* Two equal-height rows */
     gap: 20px; /* Spacing between grid items */
 }
 
@@ -31,6 +31,10 @@ body {
 
 .analytic-widget {
     background: linear-gradient(to right, #232526, #504345);
+}
+
+.operation-widget.h3 {
+    color: #232526;
 }
 
 .analytic-tab {
