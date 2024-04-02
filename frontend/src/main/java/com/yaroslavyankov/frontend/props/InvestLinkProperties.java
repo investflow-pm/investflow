@@ -10,4 +10,6 @@ import org.springframework.stereotype.Component;
 public class InvestLinkProperties {
 
     private String portfolioLink;
+
+    private String allOperationsLink;
 }

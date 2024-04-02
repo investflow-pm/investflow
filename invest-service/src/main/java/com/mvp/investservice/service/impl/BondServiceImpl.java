@@ -273,7 +273,7 @@ public class BondServiceImpl implements BondService {
      * @return
      */
     private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(bond, null);
+        BondDto bondDto = bondMapper.toDto(bond, getLastPrice(bond.getFigi()));
 
         return setOrderResponseFields(postOrderResponse, bondDto);
     }

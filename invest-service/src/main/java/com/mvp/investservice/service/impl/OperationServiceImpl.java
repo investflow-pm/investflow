@@ -30,7 +30,7 @@ public class OperationServiceImpl implements OperationService {
         try {
 
             allOperations = investApi.getOperationsService()
-                    .getAllOperationsSync(accountDto.getInvestAccountId(), Instant.now().minus(1, ChronoUnit.DAYS), Instant.now());
+                    .getAllOperationsSync(accountDto.getInvestAccountId(), Instant.now().minus(3, ChronoUnit.DAYS), Instant.now());
         } catch (Exception e) {
             throw new CannotProceedApiRequestException("Ошибка получения операций по счёту.");
         }

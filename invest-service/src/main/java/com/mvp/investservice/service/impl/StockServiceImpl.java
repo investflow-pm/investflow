@@ -254,7 +254,7 @@ public class StockServiceImpl implements StockService {
      * @return
      */
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
-        StockDto stockDto = stockMapper.toDto(shareToBuy, null);
+        StockDto stockDto = stockMapper.toDto(shareToBuy, getLastPrice(shareToBuy.getFigi()));
 
         return setOrderResponseFields(postOrderResponse, stockDto);
     }

@@ -54,7 +54,7 @@ public class BondInfoView extends VerticalLayout implements BeforeEnterObserver 
             List<BondDto> stocks = bondService.getBonds(accessToken);
 
             Grid<BondDto> grid = new Grid<>(BondDto.class, false);
-            grid.addColumn(createEmployeeRenderer()).setHeader("Акция")
+            grid.addColumn(createEmployeeRenderer()).setHeader("Облигация")
                     .setAutoWidth(true).setFlexGrow(0)
                     .setSortable(true);
             grid.addColumn(p -> p.getPrice().setScale(2, RoundingMode.HALF_UP) + " " + Currency.getInstance(p.getCurrency().toUpperCase(Locale.ROOT)).getSymbol()).setHeader("Цена")
