@@ -27,6 +27,27 @@ public class StockService {
     private final StockLinkProperties stockLinkProperties;
 
     @SneakyThrows
+    public List<StockDto> getStockByFigi(String figi, String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<PortfolioRequest> request = new HttpEntity<>(headers);
+
+        UriComponentsBuilder componentsBuilder = UriComponentsBuilder
+                .fromHttpUrl(stockLinkProperties.getStockByFigiLink())
+                .queryParam("name", figi);
+
+        ResponseEntity<List<StockDto>> response = restTemplate.exchange(
+                componentsBuilder.toUriString(),
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<List<StockDto>>() {}
+        );
+
+        return response.getBody();
+    }
+
+    @SneakyThrows
     public List<StockDto> getStocks(String accessToken) {
         int page = 1;
         int count = 300;

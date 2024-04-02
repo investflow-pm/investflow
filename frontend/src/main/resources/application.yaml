@@ -21,10 +21,12 @@ vaadin:
 stock:
   allStocksLink: ${ALL_STOCKS_LINK}
   buyStockLink: ${BUY_STOCK_LINK}
+  stockByFigiLink: ${STOCK_BY_FIGI_LINK}
 
 bond:
   allBondsLink: ${All_BOND_LINK}
   buyBondLink: ${BUY_BOND_LINK}
+  bondByFigiLink: ${BOND_BY_FIGI_LINK}
 
 eureka:
   client:

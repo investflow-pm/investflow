@@ -96,6 +96,8 @@ services:
       - BUY_STOCK_LINK=http://api-gateway:9102/api/v1/invest/stocks/buy
       - BUY_BOND_LINK=http://api-gateway:9102/api/v1/invest/bonds/buy
       - ALL_OPERATIONS_LINK=http://api-gateway:9102/api/v1/invest/operations
+      - STOCK_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/stocks
+      - BOND_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/bonds
     depends_on:
       - invest-service
       - eureka-service

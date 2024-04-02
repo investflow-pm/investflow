@@ -11,4 +11,6 @@ public class StockLinkProperties {
     private String allStocksLink;
 
     private String buyStockLink;
+
+    private String stockByFigiLink;
 }
