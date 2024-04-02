@@ -26,7 +26,7 @@ public class BondService {
     private final BondLinkProperties bondLinkProperties;
 
     @SneakyThrows
-    public List<StockDto> getBondByFigi(String figi, String accessToken) {
+    public List<BondDto> getBondByFigi(String figi, String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
 
@@ -36,11 +36,11 @@ public class BondService {
                 .fromHttpUrl(bondLinkProperties.getBondByFigiLink())
                 .queryParam("name", figi);
 
-        ResponseEntity<List<StockDto>> response = restTemplate.exchange(
+        ResponseEntity<List<BondDto>> response = restTemplate.exchange(
                 componentsBuilder.toUriString(),
                 HttpMethod.GET,
                 request,
-                new ParameterizedTypeReference<List<StockDto>>() {}
+                new ParameterizedTypeReference<List<BondDto>>() {}
         );
 
         return response.getBody();
@@ -89,6 +89,28 @@ public class BondService {
         } catch (HttpClientErrorException e) {
             e.printStackTrace();
             //Notification.show("Невозможно купить облигацию", 3000, Notification.Position.MIDDLE);
+            return null;
+        }
+    }
+
+    public OrderResponse<BondDto> saleBond(SaleRequest sale, String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<SaleRequest> request = new HttpEntity<>(sale, headers);
+
+        try {
+            ResponseEntity<OrderResponse> response = restTemplate.exchange(
+                    bondLinkProperties.getSaleBondLink(),
+                    HttpMethod.POST,
+                    request,
+                    OrderResponse.class
+            );
+
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            e.printStackTrace();
+            //Notification.show("Невозможно продать акцию", 3000, Notification.Position.MIDDLE);
             return null;
         }
     }

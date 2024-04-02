@@ -175,7 +175,7 @@ public class StocksInfoView extends VerticalLayout implements BeforeEnterObserve
                 success.open();
             }
         });
-        buyButton.setWidth("400px");
+        buyButton.setWidth("200px");
 
         Button cancelButton = new Button("Отмена", e -> dialog.close());
         cancelButton.setWidth("100px");

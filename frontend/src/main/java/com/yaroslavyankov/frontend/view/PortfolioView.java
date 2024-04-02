@@ -39,18 +39,15 @@ import java.util.Locale;
 public class PortfolioView extends VerticalLayout implements BeforeEnterObserver {
 
     private final PortfolioService portfolioService;
-    private final OperationService operationService;
 
     private final BondService bondService;
 
     private final StockService stockService;
 
     public PortfolioView(@Autowired PortfolioService portfolioService,
-                         @Autowired OperationService operationService,
                          @Autowired BondService bondService,
                          @Autowired StockService stockService) {
         this.portfolioService = portfolioService;
-        this.operationService = operationService;
         this.bondService = bondService;
         this.stockService = stockService;
     }
@@ -109,7 +106,7 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
 
             gridStock.setItems(shares);
             gridStock.addItemDoubleClickListener(e -> {
-                var dialog = addBuyStockDialog(e.getItem(), getStockDtoLots(e.getItem(), accessToken));
+                var dialog = addStockDialog(e.getItem(), getStockDtoLots(e.getItem(), accessToken));
                 dialog.open();
             });
 
@@ -132,7 +129,7 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
 
             gridBond.setItems(bonds);
             gridBond.addItemDoubleClickListener(e -> {
-                var dialog = addBuyBondDialog(e.getItem(), getBondDtoLots(e.getItem(), accessToken));
+                var dialog = addBondDialog(e.getItem(), getBondDtoLots(e.getItem(), accessToken));
                 dialog.open();
             });
 
@@ -166,7 +163,7 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
         return bond.getLots();
     }
 
-    private Dialog addBuyStockDialog(StockDto stock, Integer lots) {
+    private Dialog addStockDialog(StockDto stock, Integer lots) {
         Dialog dialog = new Dialog("Информация об акции");
 
         // dialog fields
@@ -257,12 +254,28 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
                 success.open();
             }
         });
-        buyButton.setWidth("400px");
+        buyButton.setWidth("200px");
+
+        Button saleButton = new Button("Продать");
+        saleButton.addClickListener(e -> {
+            dialog.close();
+            var result = sale(stock, lotsField.getValue(), orderType.getValue());
+            if (result == null) {
+                var failed = saleFailed();
+                failed.open();
+            }
+            else {
+                var success = saleSuccess();
+                success.open();
+            }
+        });
+        saleButton.setWidth("150px");
 
         Button cancelButton = new Button("Отмена", e -> dialog.close());
         cancelButton.setWidth("100px");
 
         horizontalLayout.add(cancelButton);
+        horizontalLayout.add(saleButton);
         horizontalLayout.add(buyButton);
 
         dialog.add(horizontalLayout);
@@ -270,7 +283,51 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
         return dialog;
     }
 
-    private Dialog addBuyBondDialog(BondDto bond, Integer lots) {
+    private OrderResponse<StockDto> sale(StockDto stock, String lots, String orderType) {
+        String accessToken = (String) VaadinSession.getCurrent().getAttribute("accessToken");
+
+        var saleRequest = new SaleRequest();
+        saleRequest.setAccountId("a7c911bb-5b01-41bf-9db7-3767ac46385d");
+        saleRequest.setFigi(stock.getFigi());
+        saleRequest.setLot(Integer.valueOf(lots));
+        saleRequest.setOrderType(OrderType.ORDER_TYPE_BESTPRICE); // TODO: change and other too
+
+        return stockService.saleStock(saleRequest, accessToken);
+    }
+
+    private OrderResponse<BondDto> sale(BondDto bond, String lots, String orderType) {
+        String accessToken = (String) VaadinSession.getCurrent().getAttribute("accessToken");
+
+        var saleRequest = new SaleRequest();
+        saleRequest.setAccountId("a7c911bb-5b01-41bf-9db7-3767ac46385d");
+        saleRequest.setFigi(bond.getFigi());
+        saleRequest.setLot(Integer.valueOf(lots));
+        saleRequest.setOrderType(OrderType.ORDER_TYPE_BESTPRICE); // TODO: change and other too
+
+        return bondService.saleBond(saleRequest, accessToken);
+    }
+
+    private Dialog saleFailed() {
+        // TODO: change
+        Dialog dialog = new Dialog("Информация о продаже");
+
+        Text text = new Text("Ошибка продажи");
+        dialog.add(text);
+
+        return dialog;
+    }
+
+    private Dialog saleSuccess() {
+        // TODO: change
+        Dialog dialog = new Dialog("Информация о продаже");
+
+        Text text = new Text("Заявка на продажу успешно выставлена");
+        dialog.add(text);
+
+        return dialog;
+    }
+
+    private Dialog addBondDialog(BondDto bond, Integer lots) {
         Dialog dialog = new Dialog("Информация об акции");
 
         // dialog fields
@@ -379,12 +436,28 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
                 success.open();
             }
         });
-        buyButton.setWidth("400px");
+        buyButton.setWidth("200px");
+
+        Button saleButton = new Button("Продать");
+        saleButton.addClickListener(e -> {
+            dialog.close();
+            var result = sale(bond, lotsField.getValue(), orderType.getValue());
+            if (result == null) {
+                var failed = saleFailed();
+                failed.open();
+            }
+            else {
+                var success = saleSuccess();
+                success.open();
+            }
+        });
+        saleButton.setWidth("150px");
 
         Button cancelButton = new Button("Отмена", e -> dialog.close());
         cancelButton.setWidth("100px");
 
         horizontalLayout.add(cancelButton);
+        horizontalLayout.add(saleButton);
         horizontalLayout.add(buyButton);
 
         dialog.add(horizontalLayout);
@@ -430,7 +503,7 @@ public class PortfolioView extends VerticalLayout implements BeforeEnterObserver
         // TODO: change
         Dialog dialog = new Dialog("Информация о покупке");
 
-        Text text = new Text("Покупка успешно совершена");
+        Text text = new Text("Заявка на покупку успешно создана");
         dialog.add(text);
 
         return dialog;

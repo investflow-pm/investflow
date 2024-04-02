@@ -1,10 +1,7 @@
 package com.yaroslavyankov.frontend.service;
 
 import com.vaadin.flow.component.notification.Notification;
-import com.yaroslavyankov.frontend.dto.OrderResponse;
-import com.yaroslavyankov.frontend.dto.PortfolioRequest;
-import com.yaroslavyankov.frontend.dto.PurchaseRequest;
-import com.yaroslavyankov.frontend.dto.StockDto;
+import com.yaroslavyankov.frontend.dto.*;
 import com.yaroslavyankov.frontend.props.StockLinkProperties;
 import com.yaroslavyankov.frontend.service.exception.ExceptionBody;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +88,28 @@ public class StockService {
         } catch (HttpClientErrorException e) {
             e.printStackTrace();
             //Notification.show("Невозможно купить акцию", 3000, Notification.Position.MIDDLE);
+            return null;
+        }
+    }
+
+    public OrderResponse<StockDto> saleStock(SaleRequest sale, String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<SaleRequest> request = new HttpEntity<>(sale, headers);
+
+        try {
+            ResponseEntity<OrderResponse> response = restTemplate.exchange(
+                    stockLinkProperties.getSaleStockLink(),
+                    HttpMethod.POST,
+                    request,
+                    OrderResponse.class
+            );
+
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            e.printStackTrace();
+            //Notification.show("Невозможно продать акцию", 3000, Notification.Position.MIDDLE);
             return null;
         }
     }

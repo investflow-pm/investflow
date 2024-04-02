@@ -14,4 +14,6 @@ public class BondLinkProperties {
     private String buyBondLink;
 
     private String bondByFigiLink;
+
+    private String saleBondLink;
 }
