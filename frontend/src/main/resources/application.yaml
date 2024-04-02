@@ -14,6 +14,7 @@ auth:
 invest:
   portfolioLink: ${PORTFOLIO_LINK}
   allOperationsLink: ${ALL_OPERATIONS_LINK}
+  accountBalanceLink: ${ACCOUNT_BALANCE_LINK}
 
 vaadin:
   productionMode: true

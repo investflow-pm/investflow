@@ -98,6 +98,7 @@ services:
       - ALL_OPERATIONS_LINK=http://api-gateway:9102/api/v1/invest/operations
       - STOCK_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/stocks
       - BOND_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/bonds
+      - ACCOUNT_BALANCE_LINK=http://api-gateway:9102/api/v1/invest/accounts
     depends_on:
       - invest-service
       - eureka-service
