@@ -1,16 +1,17 @@
 package com.yaroslavyankov.frontend.service;
 
+import com.yaroslavyankov.frontend.dto.OrderResponse;
 import com.yaroslavyankov.frontend.dto.PortfolioRequest;
+import com.yaroslavyankov.frontend.dto.PurchaseRequest;
 import com.yaroslavyankov.frontend.dto.StockDto;
 import com.yaroslavyankov.frontend.props.StockLinkProperties;
+import com.yaroslavyankov.frontend.service.exception.ExceptionBody;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -47,5 +48,27 @@ public class StockService {
         );
 
         return response.getBody();
+    }
+
+    //@SneakyThrows
+    public OrderResponse<StockDto> buyStock(PurchaseRequest purchase, String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<PurchaseRequest> request = new HttpEntity<>(purchase, headers);
+
+        try {
+            ResponseEntity<OrderResponse<StockDto>> response = restTemplate.exchange(
+                    stockLinkProperties.getBuyStockLink(),
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

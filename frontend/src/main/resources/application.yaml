@@ -19,6 +19,7 @@ vaadin:
 
 stock:
   allStocksLink: ${ALL_STOCKS_LINK}
+  buyStockLink: ${BUY_STOCK_LINK}
 
 bond:
   allBondsLink: ${All_BOND_LINK}

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Data
 @ConfigurationProperties(prefix = "stock")
 public class StockLinkProperties {
-
     private String allStocksLink;
+
+    private String buyStockLink;
 }
