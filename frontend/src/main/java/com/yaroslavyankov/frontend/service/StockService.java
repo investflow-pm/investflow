@@ -58,11 +58,11 @@ public class StockService {
         HttpEntity<PurchaseRequest> request = new HttpEntity<>(purchase, headers);
 
         try {
-            ResponseEntity<OrderResponse<StockDto>> response = restTemplate.exchange(
+            ResponseEntity<OrderResponse> response = restTemplate.exchange(
                     stockLinkProperties.getBuyStockLink(),
                     HttpMethod.POST,
                     request,
-                    new ParameterizedTypeReference<>() {}
+                    OrderResponse.class
             );
 
             return response.getBody();

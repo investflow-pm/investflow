@@ -2,13 +2,11 @@ package com.yaroslavyankov.frontend.view.stock;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -18,10 +16,10 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.yaroslavyankov.frontend.dto.OrderResponse;
 import com.yaroslavyankov.frontend.dto.OrderType;
+import com.yaroslavyankov.frontend.util.OrderTypeUtil;
 import com.yaroslavyankov.frontend.dto.PurchaseRequest;
 import com.yaroslavyankov.frontend.dto.StockDto;
 import com.yaroslavyankov.frontend.service.StockService;
@@ -155,8 +153,8 @@ public class StocksInfoView extends VerticalLayout implements BeforeEnterObserve
         dialogLayout.add(sumField);
 
         var orderType = new ComboBox<String>("Тип заявки");
-        orderType.setItems(OrderType.getRussianValues());
-        orderType.setValue(OrderType.ORDER_TYPE_LIMIT.getRussianValue());
+        orderType.setItems(OrderTypeUtil.getRussianValues());
+        orderType.setValue(OrderTypeUtil.ORDER_TYPE_LIMIT.getRussianValue());
         orderType.setWidthFull();
         dialogLayout.add(orderType);
 
@@ -200,7 +198,7 @@ public class StocksInfoView extends VerticalLayout implements BeforeEnterObserve
         purchaseRequest.setAccountId("a7c911bb-5b01-41bf-9db7-3767ac46385d");
         purchaseRequest.setFigi(stock.getFigi());
         purchaseRequest.setLot(Integer.valueOf(lots));
-        purchaseRequest.setOrderType(OrderType.getValue(orderType));
+        purchaseRequest.setOrderType(OrderType.ORDER_TYPE_LIMIT);
 
         return stockService.buyStock(purchaseRequest, accessToken);
     }
