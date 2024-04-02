@@ -23,6 +23,7 @@ stock:
 
 bond:
   allBondsLink: ${All_BOND_LINK}
+  buyBondLink: ${BUY_BOND_LINK}
 
 eureka:
   client:

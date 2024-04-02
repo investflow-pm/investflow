@@ -198,7 +198,7 @@ public class StocksInfoView extends VerticalLayout implements BeforeEnterObserve
         purchaseRequest.setAccountId("a7c911bb-5b01-41bf-9db7-3767ac46385d");
         purchaseRequest.setFigi(stock.getFigi());
         purchaseRequest.setLot(Integer.valueOf(lots));
-        purchaseRequest.setOrderType(OrderType.ORDER_TYPE_LIMIT);
+        purchaseRequest.setOrderType(OrderType.ORDER_TYPE_BESTPRICE);
 
         return stockService.buyStock(purchaseRequest, accessToken);
     }

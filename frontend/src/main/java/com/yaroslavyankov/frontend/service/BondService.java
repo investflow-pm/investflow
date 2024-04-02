@@ -1,8 +1,6 @@
 package com.yaroslavyankov.frontend.service;
 
-import com.yaroslavyankov.frontend.dto.BondDto;
-import com.yaroslavyankov.frontend.dto.PortfolioRequest;
-import com.yaroslavyankov.frontend.dto.StockDto;
+import com.yaroslavyankov.frontend.dto.*;
 import com.yaroslavyankov.frontend.props.BondLinkProperties;
 import com.yaroslavyankov.frontend.props.StockLinkProperties;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -49,5 +48,27 @@ public class BondService {
         );
 
         return response.getBody();
+    }
+
+    public OrderResponse<BondDto> buyBond(PurchaseRequest purchase, String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<PurchaseRequest> request = new HttpEntity<>(purchase, headers);
+
+        try {
+            ResponseEntity<OrderResponse> response = restTemplate.exchange(
+                    bondLinkProperties.getBuyBondLink(),
+                    HttpMethod.POST,
+                    request,
+                    OrderResponse.class
+            );
+
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            e.printStackTrace();
+            //Notification.show("Невозможно купить облигацию", 3000, Notification.Position.MIDDLE);
+            return null;
+        }
     }
 }

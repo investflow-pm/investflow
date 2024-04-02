@@ -1,5 +1,6 @@
 package com.yaroslavyankov.frontend.service;
 
+import com.vaadin.flow.component.notification.Notification;
 import com.yaroslavyankov.frontend.dto.OrderResponse;
 import com.yaroslavyankov.frontend.dto.PortfolioRequest;
 import com.yaroslavyankov.frontend.dto.PurchaseRequest;
@@ -66,8 +67,9 @@ public class StockService {
             );
 
             return response.getBody();
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
             e.printStackTrace();
+            //Notification.show("Невозможно купить акцию", 3000, Notification.Position.MIDDLE);
             return null;
         }
     }

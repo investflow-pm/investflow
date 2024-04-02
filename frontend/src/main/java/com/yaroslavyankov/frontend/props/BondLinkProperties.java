@@ -11,4 +11,5 @@ public class BondLinkProperties {
 
     private String allBondsLink;
 
+    private String buyBondLink;
 }

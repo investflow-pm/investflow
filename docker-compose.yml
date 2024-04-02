@@ -94,6 +94,7 @@ services:
       - EUREKA_URL=http://eureka-service:9101/eureka
       - ALL_STOCKS_LINK=http://api-gateway:9102/api/v1/invest/stocks/all
       - BUY_STOCK_LINK=http://api-gateway:9102/api/v1/invest/stocks/buy
+      - BUY_BOND_LINK=http://api-gateway:9102/api/v1/invest/bonds/buy
     depends_on:
       - invest-service
       - eureka-service
