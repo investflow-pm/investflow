@@ -7,6 +7,10 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
 
+/**
+ * @Deprecated
+ */
+
 @Route("navigation")
 public class SideNavigation extends Div {
 

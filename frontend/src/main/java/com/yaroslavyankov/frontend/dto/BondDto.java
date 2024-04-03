@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class BondDto extends Asset {
-
     private String ticker;
 
     private String figi;
@@ -30,5 +29,7 @@ public class BondDto extends Asset {
 
     private RiskLevel riskLevel;
 
-    // TODO: add current price???????????
+    private BigDecimal price;
+
+    private BrandLogoDto brandLogo;
 }

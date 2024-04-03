@@ -78,7 +78,9 @@ public class BondServiceImpl implements BondService {
 
         List<BondDto> bonds = new ArrayList<>();
         for (var bond : tradableBonds) {
-            bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
+            if (bond.getCurrency().equals("rub")) {
+                bonds.add(bondMapper.toDto(bond, getLastPrice(bond.getFigi())));
+            }
         }
 
         return bonds;
@@ -271,7 +273,7 @@ public class BondServiceImpl implements BondService {
      * @return
      */
     private OrderResponse<BondDto> generateOrderResponse(Bond bond, PostOrderResponse postOrderResponse) {
-        BondDto bondDto = bondMapper.toDto(bond, null);
+        BondDto bondDto = bondMapper.toDto(bond, getLastPrice(bond.getFigi()));
 
         return setOrderResponseFields(postOrderResponse, bondDto);
     }

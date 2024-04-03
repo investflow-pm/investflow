@@ -80,7 +80,9 @@ public class StockServiceImpl implements StockService {
 
         List<StockDto> stocks = new ArrayList<>();
         for (var stock : tradableStocks) {
-            stocks.add(stockMapper.toDto(stock, getLastPrice(stock.getFigi())));
+            if (stock.getCurrency().equals("rub")) {
+                stocks.add(stockMapper.toDto(stock, getLastPrice(stock.getFigi())));
+            }
         }
 
         return stocks;
@@ -252,7 +254,7 @@ public class StockServiceImpl implements StockService {
      * @return
      */
     private OrderResponse<StockDto> generateOrderResponse(Share shareToBuy, PostOrderResponse postOrderResponse) {
-        StockDto stockDto = stockMapper.toDto(shareToBuy, null);
+        StockDto stockDto = stockMapper.toDto(shareToBuy, getLastPrice(shareToBuy.getFigi()));
 
         return setOrderResponseFields(postOrderResponse, stockDto);
     }

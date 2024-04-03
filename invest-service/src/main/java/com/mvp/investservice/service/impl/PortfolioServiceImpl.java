@@ -26,6 +26,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mvp.investservice.util.MoneyParser.convertToBigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class PortfolioServiceImpl implements PortfolioService {
@@ -117,12 +119,12 @@ public class PortfolioServiceImpl implements PortfolioService {
             case "share" -> {
                 Share share = investApi.getInstrumentsService()
                         .getShareByFigiSync(position.getFigi());
-                asset = stockMapper.toDto(share, null); // TODO: change?
+                asset = stockMapper.toDto(share, getLastPrice(share.getFigi()));
             }
             case "bond" -> {
                 Bond bond = investApi.getInstrumentsService()
                         .getBondByFigiSync(position.getFigi());
-                asset = bondMapper.toDto(bond, null); // TODO: change?
+                asset = bondMapper.toDto(bond, getLastPrice(bond.getFigi()).multiply(BigDecimal.TEN)); // TODO: change?
             }
             case "currency" -> {
                 Currency currency = investApi.getInstrumentsService()
@@ -131,6 +133,12 @@ public class PortfolioServiceImpl implements PortfolioService {
             }
         }
         return asset;
+    }
+
+    public BigDecimal getLastPrice(String figi) {
+        var lastPrice = investApi.getMarketDataService().getLastPricesSync(List.of(figi)).get(0).getPrice();
+
+        return convertToBigDecimal(lastPrice);
     }
 
     private PositionResponse getPositionResponse(Position position, Asset asset) {

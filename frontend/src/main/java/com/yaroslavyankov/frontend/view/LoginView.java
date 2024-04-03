@@ -57,7 +57,7 @@ public class LoginView extends VerticalLayout {
                     VaadinSession.getCurrent().setAttribute("refreshToken", response.getRefreshToken());
                 }
 
-                UI.getCurrent().navigate("/workspace");
+                UI.getCurrent().navigate("/workspace/home");
             } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
                     Notification.show("Некорреектный username или пароль", 3000, Notification.Position.MIDDLE);

@@ -10,4 +10,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = CurrencyDto.class, name = "currency")
 })
 public class Asset {
+
+    protected String sector;
+
+    public String getSector() {
+        return sector;
+    }
 }

@@ -34,6 +34,7 @@ services:
       - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - db
+      - eureka-service
 
   auth-microservice:
     build:
@@ -51,6 +52,7 @@ services:
       - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - crud-microservice
+      - eureka-service
 
   invest-service:
     build:
@@ -71,6 +73,7 @@ services:
     depends_on:
       - crud-microservice
       - auth-microservice
+      - eureka-service
       
   frontend:
     build:
@@ -79,15 +82,46 @@ services:
     image: frontend
     ports:
       - "9100:9100"
+    links:
+      - api-gateway
     networks:
       - investflow_network
     environment:
       - JAVA_OPTS=-Xmx512M
-      - REGISTER_USER_LINK=http://auth-microservice:9099/api/v1/auth/register
-      - LOGIN_USER_LINK=http://auth-microservice:9099/api/v1/auth/login
+      - REGISTER_USER_LINK=http://api-gateway:9102/api/v1/auth/register
+      - LOGIN_USER_LINK=http://api-gateway:9102/api/v1/auth/login
+      - PORTFOLIO_LINK=http://api-gateway:9102/api/v1/invest/portfolios
+      - EUREKA_URL=http://eureka-service:9101/eureka
+      - ALL_STOCKS_LINK=http://api-gateway:9102/api/v1/invest/stocks/all
+      - BUY_STOCK_LINK=http://api-gateway:9102/api/v1/invest/stocks/buy
+      - BUY_BOND_LINK=http://api-gateway:9102/api/v1/invest/bonds/buy
+      - ALL_OPERATIONS_LINK=http://api-gateway:9102/api/v1/invest/operations
+      - STOCK_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/stocks
+      - BOND_BY_FIGI_LINK=http://api-gateway:9102/api/v1/invest/bonds
+      - ACCOUNT_BALANCE_LINK=http://api-gateway:9102/api/v1/invest/accounts
+    depends_on:
+      - invest-service
+      - eureka-service
+      - auth-microservice
+      - api-gateway
+
+  api-gateway:
+    build:
+      context: ./
+      dockerfile: api-gateway/Dockerfile
+    image: api-gateway
+    ports:
+      - "9102:9102"
+    networks:
+      - investflow_network
+    environment:
+      - JAVA_OPTS=-Xmx512M
+      - JWT_SECRET=ZmFzZGZoamFzZGtoZmthc2tsZmphZHNrZmpBR0FTR0FTREdTQURHRFNmYWRzamZrc2Fkdm5qc2RhdmprYXNmamthc2ZBU0dWQVNER0ZBU0dBc2dmYWhzZGprZ2hhc2Rqa2Zhc2RrZmFza2RqaGZnamRzaGFmamhzZGtqYWZhc2pkaw==
       - EUREKA_URL=http://eureka-service:9101/eureka
     depends_on:
       - invest-service
+      - eureka-service
+      - auth-microservice
 
 #  tg-bot:
 #    build:

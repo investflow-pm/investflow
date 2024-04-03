@@ -6,6 +6,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -18,11 +22,17 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.yaroslavyankov.frontend.view.bond.BondInfoView;
+import com.yaroslavyankov.frontend.view.home.HomeView;
+import com.yaroslavyankov.frontend.view.stock.StocksInfoView;
 
 import java.util.Optional;
 
 @PageTitle("Workspace | InvestFlow")
 @Route("workspace")
+@CssImport("./styles/style.css")
+@Uses(Chart.class)
+@Uses(Grid.class)
 public class MainView extends AppLayout {
 
     private final Tabs menu;
@@ -43,7 +53,7 @@ public class MainView extends AppLayout {
 
         // Configure styling for the header
         layout.setId("header");
-        layout.getThemeList().set("dark", true);
+        layout.getThemeList().set("light", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -103,8 +113,15 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[] { createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
-                    createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create())};
+        return new Tab[]{
+                createTab("Главная", HomeView.class, VaadinIcon.HOME.create()),
+                createTab("Общая информация", GeneralInfoView.class, VaadinIcon.WALLET.create()),
+                createTab("Портфель", PortfolioView.class, VaadinIcon.BRIEFCASE.create()),
+                createTab("Операции", OperationView.class, VaadinIcon.BOOK.create()),
+                createTab("", HomeView.class, VaadinIcon.LINE_H.create()),
+                createTab("Акции", StocksInfoView.class, VaadinIcon.CASH.create()),
+                createTab("Облигации", BondInfoView.class, VaadinIcon.SCALE.create())
+        };
     }
 
     private static Tab createTab(String text,
